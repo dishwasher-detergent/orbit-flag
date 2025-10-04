@@ -28,19 +28,22 @@ import { createTeam } from "@/lib/team";
 import { AddTeamFormData, addTeamSchema } from "@/lib/team/schemas";
 import { cn } from "@/lib/utils";
 
-export function CreateTeam() {
+export function CreateTeam({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
 
   return (
     <DyanmicDrawer
-      title="Team"
-      description="Create a new Team"
+      title="Team Creation"
+      description="Create a new Team to house your projects!"
       open={open}
       setOpen={setOpen}
       button={
-        <Button size="sm">
+        <Button
+          className={cn(className, "justify-start px-2!")}
+          variant="ghost"
+        >
+          <LucidePlus className="size-6 text-muted-foreground border p-1 rounded-md" />
           Create Team
-          <LucidePlus className="ml-2 size-3.5" />
         </Button>
       }
     >
@@ -49,15 +52,14 @@ export function CreateTeam() {
   );
 }
 
-interface FormProps extends React.ComponentProps<"form"> {
-  setOpen: (e: boolean) => void;
-}
-
-function CreateForm({ className, setOpen }: FormProps) {
+function CreateForm({
+  className,
+  setOpen,
+}: React.ComponentProps<"form"> & { setOpen: (open: boolean) => void }) {
   const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(false);
 
   const form = useForm<AddTeamFormData>({
+    mode: "onChange",
     resolver: zodResolver(addTeamSchema),
     defaultValues: {
       name: "",
@@ -66,22 +68,27 @@ function CreateForm({ className, setOpen }: FormProps) {
   });
 
   async function onSubmit(values: AddTeamFormData) {
-    setLoading(true);
+    toast.promise(
+      createTeam({
+        data: values,
+      }),
+      {
+        loading: "Creating team...",
+        success: (data) => {
+          if (data.success) {
+            setOpen(false);
+            router.push(`/app/teams/${data.data!.$id}`);
+          } else {
+            throw new Error(data.message);
+          }
 
-    const data = await createTeam({
-      data: values,
-    });
-
-    if (data.success) {
-      toast.success(data.message);
-      router.push(`/app/teams/${data.data!.$id}`);
-      setOpen(false);
-    } else {
-      toast.error(data.message);
-    }
-
-    setLoading(false);
-    setOpen(false);
+          return data.message;
+        },
+        error: (err) => {
+          return err.message;
+        },
+      }
+    );
   }
 
   return (
@@ -89,7 +96,7 @@ function CreateForm({ className, setOpen }: FormProps) {
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(
-          "h-full flex flex-col gap-4 overflow-hidden p-4 md:p-0",
+          "flex h-full flex-col gap-4 overflow-hidden p-4 md:p-0",
           className
         )}
       >
@@ -99,7 +106,7 @@ function CreateForm({ className, setOpen }: FormProps) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Team</FormLabel>
+                <FormLabel>Team Name</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
@@ -150,13 +157,17 @@ function CreateForm({ className, setOpen }: FormProps) {
         <Button
           className="sticky bottom-0"
           type="submit"
-          disabled={loading || !form.formState.isValid}
+          disabled={
+            form.formState.isSubmitting ||
+            !form.formState.isValid ||
+            !form.formState.isDirty
+          }
         >
-          Create
-          {loading ? (
-            <LucideLoader2 className="mr-2 size-3.5 animate-spin" />
+          Create Team
+          {form.formState.isSubmitting ? (
+            <LucideLoader2 className="size-3.5 animate-spin" />
           ) : (
-            <LucidePlus className="mr-2 size-3.5" />
+            <LucidePlus className="size-3.5" />
           )}
         </Button>
       </form>

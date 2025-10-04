@@ -60,11 +60,10 @@ export async function getUserData(): Promise<Result<User>> {
 
           return {
             success: true,
-            message: "Products successfully retrieved.",
+            message: "User successfully retrieved.",
             data: {
               ...user,
               ...data,
-              count: userStats.rows[0]?.count || 0,
             },
           };
         } catch (err) {
@@ -116,7 +115,6 @@ export async function getUserById(id: string): Promise<Result<UserData>> {
             message: "User successfully retrieved.",
             data: {
               ...data,
-              count: userStats.rows[0]?.count || 0,
             },
           };
         } catch (err) {

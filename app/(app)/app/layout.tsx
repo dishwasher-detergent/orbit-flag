@@ -1,4 +1,9 @@
-import { Nav } from "@/components/ui/nav";
+import { AppSidebar } from "@/components/app-sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 export default async function AppLayout({
   children,
@@ -6,11 +11,15 @@ export default async function AppLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="flex w-full grow flex-col">
-      <Nav />
-      <section className="mx-auto max-w-6xl w-full p-4 md:px-8">
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset className="overflow-hidden h-dvh">
+        <header className="py-2 px-4 border-b w-full flex flex-row items-center gap-2 md:hidden">
+          <SidebarTrigger />
+          <p className="font-bold">Orbit Flag</p>
+        </header>
         {children}
-      </section>
-    </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

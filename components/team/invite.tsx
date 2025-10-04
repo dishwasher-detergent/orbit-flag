@@ -6,10 +6,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenuItem,
-  DropdownMenuShortcut,
-} from "@/components/ui/dropdown-menu";
 import { DyanmicDrawer } from "@/components/ui/dynamic-drawer";
 import {
   Form,
@@ -21,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { TeamData } from "@/interfaces/team.interface";
-import { inviteMember } from "@/lib/team";
+import { addMember } from "@/lib/team";
 import { InviteTeamFormData, inviteTeamSchema } from "@/lib/team/schemas";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -36,17 +32,16 @@ export function InviteTeam({ team }: { team: TeamData }) {
       open={open}
       setOpen={setOpen}
       button={
-        <DropdownMenuItem
-          onClick={(e) => {
-            e.preventDefault();
+        <Button
+          onClick={() => {
             setOpen(!open);
           }}
+          size="sm"
+          variant="secondary"
         >
-          Invite
-          <DropdownMenuShortcut>
-            <LucideUserRoundPlus className="size-3.5" />
-          </DropdownMenuShortcut>
-        </DropdownMenuItem>
+          Add Member
+          <LucideUserRoundPlus className="size-3.5" />
+        </Button>
       }
     >
       <InviteForm setOpen={setOpen} team={team} />
@@ -72,7 +67,7 @@ function InviteForm({ className, setOpen, team }: FormProps) {
   async function onSubmit(values: InviteTeamFormData) {
     setLoading(true);
 
-    const data = await inviteMember(team.$id, values.email);
+    const data = await addMember(team.$id, values.email);
 
     if (data.success) {
       toast.success(data.message);
