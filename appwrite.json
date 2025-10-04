@@ -1,6 +1,6 @@
 {
-    "projectId": "appwrite-nextjs-starter",
-    "projectName": "appwrite-nextjs-starter",
+    "projectId": "orbit-flag",
+    "projectName": "orbit-flag",
     "settings": {
         "services": {
             "account": true,
@@ -12,7 +12,7 @@
             "teams": true,
             "users": true,
             "functions": true,
-            "graphql": true,
+            "graphql": false,
             "messaging": true
         },
         "auth": {
@@ -39,83 +39,22 @@
     },
     "databases": [
         {
-            "$id": "sample",
-            "name": "sample",
+            "$id": "orbit-flag",
+            "name": "orbit-flag",
             "enabled": true
         }
     ],
     "collections": [
         {
-            "$id": "sample",
-            "$permissions": [
-                "create(\"users\")"
-            ],
-            "databaseId": "sample",
-            "name": "sample",
-            "enabled": true,
-            "documentSecurity": true,
-            "attributes": [
-                {
-                    "key": "name",
-                    "type": "string",
-                    "required": true,
-                    "array": false,
-                    "size": 32,
-                    "default": null
-                },
-                {
-                    "key": "description",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "size": 128,
-                    "default": null
-                },
-                {
-                    "key": "image",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "size": 128,
-                    "default": null
-                },
-                {
-                    "key": "userId",
-                    "type": "string",
-                    "required": true,
-                    "array": false,
-                    "size": 32,
-                    "default": null
-                },
-                {
-                    "key": "teamId",
-                    "type": "string",
-                    "required": true,
-                    "array": false,
-                    "size": 128,
-                    "default": null
-                }
-            ],
-            "indexes": []
-        },
-        {
             "$id": "user",
             "$permissions": [
                 "create(\"users\")"
             ],
-            "databaseId": "sample",
+            "databaseId": "orbit-flag",
             "name": "user",
             "enabled": true,
             "documentSecurity": true,
             "attributes": [
-                {
-                    "key": "avatar",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "size": 128,
-                    "default": null
-                },
                 {
                     "key": "about",
                     "type": "string",
@@ -140,7 +79,7 @@
             "$permissions": [
                 "create(\"users\")"
             ],
-            "databaseId": "sample",
+            "databaseId": "orbit-flag",
             "name": "team",
             "enabled": true,
             "documentSecurity": true,
@@ -160,51 +99,12 @@
                     "array": false,
                     "size": 256,
                     "default": null
-                },
-                {
-                    "key": "avatar",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "size": 128,
-                    "default": null
                 }
             ],
             "indexes": []
         }
     ],
-    "buckets": [
-        {
-            "$id": "sample",
-            "$permissions": [
-                "create(\"users\")",
-                "read(\"any\")"
-            ],
-            "fileSecurity": true,
-            "name": "sample",
-            "enabled": true,
-            "maximumFileSize": 30000000,
-            "allowedFileExtensions": [],
-            "compression": "none",
-            "encryption": true,
-            "antivirus": true
-        },
-        {
-            "$id": "avatar",
-            "$permissions": [
-                "read(\"any\")",
-                "create(\"users\")"
-            ],
-            "fileSecurity": true,
-            "name": "avatar",
-            "enabled": true,
-            "maximumFileSize": 30000000,
-            "allowedFileExtensions": [],
-            "compression": "none",
-            "encryption": true,
-            "antivirus": true
-        }
-    ],
+    "buckets": [],
     "teams": [],
     "functions": []
 }

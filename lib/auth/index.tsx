@@ -5,11 +5,12 @@ import { cookies, headers } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 import { ID, Models, OAuthProvider, Permission, Role } from "node-appwrite";
 
+import { TEAM_NAME_MAX_LENGTH } from "@/constants/team.constants";
 import { AuthResponse, Response, Result } from "@/interfaces/result.interface";
 import { User, UserData } from "@/interfaces/user.interface";
 import { COOKIE_KEY, DATABASE_ID, USER_COLLECTION_ID } from "@/lib/constants";
 import { createAdminClient, createSessionClient } from "@/lib/server/appwrite";
-import { deleteAvatarImage, uploadAvatarImage } from "@/lib/storage";
+import { createTeam } from "../team";
 import {
   ResetPasswordFormData,
   SignInFormData,
@@ -23,9 +24,12 @@ import {
  * @returns {Promise<Models.User<Models.Preferences> | null>} A promise that resolves to the account information
  * of the logged-in user, or null if no user is logged in.
  */
-export async function getLoggedInUser(): Promise<Models.User<Models.Preferences> | null> {
+export async function getLoggedInUser(): Promise<Models.User<{
+  lastVisitedTeam: string | null;
+}> | null> {
   try {
     const { account } = await createSessionClient();
+
     return await account.get();
   } catch {
     return null;
@@ -38,16 +42,21 @@ export async function getLoggedInUser(): Promise<Models.User<Models.Preferences>
  */
 export async function getUserData(): Promise<Result<User>> {
   return withAuth(async (user) => {
-    const { database } = await createSessionClient();
+    const { table: database } = await createSessionClient();
 
     return unstable_cache(
       async (id) => {
+        const startOfDay = new Date();
+        startOfDay.setUTCHours(0, 0, 0, 0);
+        const endOfDay = new Date();
+        endOfDay.setUTCHours(23, 59, 59, 999);
+
         try {
-          const data = await database.getDocument<UserData>(
-            DATABASE_ID,
-            USER_COLLECTION_ID,
-            id
-          );
+          const data = await database.getRow<UserData>({
+            databaseId: DATABASE_ID,
+            tableId: USER_COLLECTION_ID,
+            rowId: id,
+          });
 
           return {
             success: true,
@@ -55,6 +64,7 @@ export async function getUserData(): Promise<Result<User>> {
             data: {
               ...user,
               ...data,
+              count: userStats.rows[0]?.count || 0,
             },
           };
         } catch (err) {
@@ -69,7 +79,7 @@ export async function getUserData(): Promise<Result<User>> {
           };
         }
       },
-      ["user"],
+      ["user", `user:${user.$id}`],
       {
         tags: ["user", `user:${user.$id}`],
         revalidate: 600,
@@ -85,21 +95,29 @@ export async function getUserData(): Promise<Result<User>> {
  */
 export async function getUserById(id: string): Promise<Result<UserData>> {
   return withAuth(async () => {
-    const { database } = await createSessionClient();
+    const { table: database } = await createSessionClient();
 
     return unstable_cache(
       async (id) => {
+        const startOfDay = new Date();
+        startOfDay.setUTCHours(0, 0, 0, 0);
+        const endOfDay = new Date();
+        endOfDay.setUTCHours(23, 59, 59, 999);
+
         try {
-          const data = await database.getDocument<UserData>(
-            DATABASE_ID,
-            USER_COLLECTION_ID,
-            id
-          );
+          const data = await database.getRow<UserData>({
+            databaseId: DATABASE_ID,
+            tableId: USER_COLLECTION_ID,
+            rowId: id,
+          });
 
           return {
             success: true,
-            message: "Products successfully retrieved.",
-            data,
+            message: "User successfully retrieved.",
+            data: {
+              ...data,
+              count: userStats.rows[0]?.count || 0,
+            },
           };
         } catch (err) {
           const error = err as Error;
@@ -113,7 +131,7 @@ export async function getUserById(id: string): Promise<Result<UserData>> {
           };
         }
       },
-      ["user", id],
+      ["user", `user:${id}`, id],
       {
         tags: ["user", `user:${id}`],
         revalidate: 600,
@@ -135,44 +153,18 @@ export async function updateProfile({
   id: string;
   data: UpdateProfileFormData;
 }): Promise<Response> {
-  return withAuth(async (user) => {
-    const { account, database } = await createSessionClient();
+  return withAuth(async () => {
+    const { account, table: database } = await createSessionClient();
 
     try {
-      const userData = await database.getDocument<UserData>(
-        DATABASE_ID,
-        USER_COLLECTION_ID,
-        user.$id
-      );
-
-      if (data.image instanceof File) {
-        if (userData.avatar) {
-          await deleteAvatarImage(userData.avatar);
-        }
-
-        const image = await uploadAvatarImage({
-          data: data.image,
-        });
-
-        if (!image.success) {
-          throw new Error(image.message);
-        }
-
-        data.image = image.data?.$id;
-      } else if (data.image === null && userData.avatar) {
-        const image = await deleteAvatarImage(userData.avatar);
-
-        if (!image.success) {
-          throw new Error(image.message);
-        }
-
-        data.image = null;
-      }
-
-      await account.updateName(data.name);
-      await database.updateDocument(DATABASE_ID, USER_COLLECTION_ID, id, {
-        avatar: data.image,
-        about: data.about,
+      await account.updateName({ name: data.name });
+      await database.updateRow({
+        databaseId: DATABASE_ID,
+        tableId: USER_COLLECTION_ID,
+        rowId: id,
+        data: {
+          about: data.about,
+        },
       });
 
       revalidateTag("user");
@@ -197,45 +189,6 @@ export async function updateProfile({
 }
 
 /**
- * Get a list of logs
- * @returns {Promise<Result<Models.LogList>>} The list of logs
- */
-export async function getUserLogs(): Promise<Result<Models.LogList>> {
-  return withAuth(async () => {
-    const { account } = await createSessionClient();
-
-    return unstable_cache(
-      async () => {
-        try {
-          const logs = await account.listLogs();
-
-          return {
-            success: true,
-            message: "Products successfully retrieved.",
-            data: logs,
-          };
-        } catch (err) {
-          const error = err as Error;
-
-          // This is where you would look to something like Splunk.
-          console.error(error);
-
-          return {
-            success: false,
-            message: error.message,
-          };
-        }
-      },
-      ["user-logs"],
-      {
-        tags: ["user-logs"],
-        revalidate: 600,
-      }
-    )();
-  });
-}
-
-/**
  * Logs out the currently logged-in user.
  * @returns {Promise<boolean>} A promise that resolves to true if the user is logged in, false otherwise.
  */
@@ -248,7 +201,7 @@ export async function logOut(): Promise<boolean> {
 export async function deleteSession(): Promise<void> {
   const { account } = await createSessionClient();
 
-  account.deleteSession("current");
+  account.deleteSession({ sessionId: "current" });
   (await cookies()).delete(COOKIE_KEY);
 
   revalidateTag("logged_in_user");
@@ -268,7 +221,10 @@ export async function signInWithEmail(
   const { account } = await createAdminClient();
 
   try {
-    const session = await account.createEmailPasswordSession(email, password);
+    const session = await account.createEmailPasswordSession({
+      email,
+      password,
+    });
 
     revalidateTag("logged_in_user");
 
@@ -311,8 +267,11 @@ export async function signUpWithEmail(
 
   try {
     const id = ID.unique();
-    await account.create(id, email, password, name);
-    const session = await account.createEmailPasswordSession(email, password);
+    await account.create({ userId: id, email, password, name });
+    const session = await account.createEmailPasswordSession({
+      email,
+      password,
+    });
 
     (await cookies()).set(COOKIE_KEY, session.secret, {
       path: "/",
@@ -322,6 +281,12 @@ export async function signUpWithEmail(
     });
 
     await createUserData(session.userId);
+    await createTeam({
+      data: {
+        name: `${name.slice(0, TEAM_NAME_MAX_LENGTH - 7)}'s Team`,
+        about: "This team was automatically created for you.",
+      },
+    });
   } catch (err) {
     const error = err as Error;
 
@@ -345,11 +310,11 @@ export async function signUpWithGithub(): Promise<void> {
   const { account } = await createAdminClient();
   const origin = (await headers()).get("origin");
 
-  const redirectUrl = await account.createOAuth2Token(
-    OAuthProvider.Github,
-    `${origin}/api/auth/callback`,
-    `${origin}/signup`
-  );
+  const redirectUrl = await account.createOAuth2Token({
+    provider: OAuthProvider.Github,
+    success: `${origin}/api/auth/callback`,
+    failure: `${origin}/signup`,
+  });
 
   return redirect(redirectUrl);
 }
@@ -368,7 +333,7 @@ export async function createPasswordRecovery(
   const origin = (await headers()).get("origin");
 
   try {
-    await account.createRecovery(email, `${origin}/reset`);
+    await account.createRecovery({ email, url: `${origin}/reset` });
   } catch (err) {
     const error = err as Error;
 
@@ -399,7 +364,7 @@ export async function resetPassword(
   const { account } = await createAdminClient();
 
   try {
-    await account.updateRecovery(id, token, password);
+    await account.updateRecovery({ userId: id, secret: token, password });
   } catch (err) {
     const error = err as Error;
 
@@ -425,38 +390,71 @@ export async function createUserData(
   userId: string
 ): Promise<Result<UserData>> {
   return withAuth(async (user) => {
-    const { database } = await createAdminClient();
+    const { table: database } = await createAdminClient();
 
     try {
-      await database.getDocument<UserData>(
-        DATABASE_ID,
-        USER_COLLECTION_ID,
-        userId
-      );
+      await database.getRow<UserData>({
+        databaseId: DATABASE_ID,
+        tableId: USER_COLLECTION_ID,
+        rowId: userId,
+      });
 
       return {
         success: true,
         message: "User data already exists.",
       };
     } catch {
-      await database.createDocument<UserData>(
-        DATABASE_ID,
-        USER_COLLECTION_ID,
-        userId,
-        {
+      await database.createRow<UserData>({
+        databaseId: DATABASE_ID,
+        tableId: USER_COLLECTION_ID,
+        rowId: userId,
+        data: {
           name: user.name,
-          avatar: null,
         },
-        [
+        permissions: [
           Permission.read(Role.user(userId)),
           Permission.write(Role.user(userId)),
           Permission.read(Role.users()),
-        ]
-      );
+        ],
+      });
 
       return {
         success: true,
         message: "User data successfully created.",
+      };
+    }
+  });
+}
+
+/**
+ * Set the last visited team for the user
+ * @param teamId The team ID to set as last visited
+ * @returns {Promise<Result<void>>} Result of the operation
+ */
+export async function setLastVisitedTeam(
+  teamId: string | null
+): Promise<Result<void>> {
+  return withAuth(async () => {
+    const { account } = await createSessionClient();
+
+    try {
+      await account.updatePrefs({
+        lastVisitedTeam: teamId,
+      });
+
+      return {
+        success: true,
+        message: "Last visited team set successfully.",
+      };
+    } catch (err) {
+      const error = err as Error;
+
+      // Logging to Vercel
+      console.error(error);
+
+      return {
+        success: false,
+        message: error.message,
       };
     }
   });

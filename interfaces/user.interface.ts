@@ -1,7 +1,6 @@
 import { Models } from "node-appwrite";
 
-export interface UserData extends Models.Document {
-  avatar: string | null;
+export interface UserData extends Models.Row {
   name: string;
   about?: string;
 }
