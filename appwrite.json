@@ -1,6 +1,7 @@
 {
     "projectId": "orbit-flag",
     "projectName": "orbit-flag",
+    "endpoint": "https://nyc.cloud.appwrite.io/v1",
     "settings": {
         "services": {
             "account": true,
@@ -11,6 +12,7 @@
             "storage": true,
             "teams": true,
             "users": true,
+            "sites": true,
             "functions": true,
             "graphql": false,
             "messaging": true
