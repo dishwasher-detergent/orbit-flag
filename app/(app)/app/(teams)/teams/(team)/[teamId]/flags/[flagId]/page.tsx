@@ -1,4 +1,4 @@
-export default async function FlagDetails({
+export default async function FlagDetailsPage({
   params,
 }: {
   params: Promise<{ teamId: string; flagId: string }>;

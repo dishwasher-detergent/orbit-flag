@@ -11,7 +11,7 @@ import {
 import { setLastVisitedTeam } from "@/lib/auth";
 import { getCurrentUserRoles, getTeamById } from "@/lib/team";
 
-export default async function Settings({
+export default async function SettingsPage({
   params,
 }: {
   params: Promise<{ teamId: string }>;

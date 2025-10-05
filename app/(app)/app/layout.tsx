@@ -18,7 +18,7 @@ export default async function AppLayout({
           <SidebarTrigger />
           <p className="font-bold">Orbit Flag</p>
         </header>
-        {children}
+        <main className="overflow-y-auto">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
