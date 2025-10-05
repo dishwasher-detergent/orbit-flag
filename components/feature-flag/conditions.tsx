@@ -109,8 +109,7 @@ export function FeatureFlagConditions({
                   type="button"
                   onClick={() => remove(index)}
                   size="icon"
-                  variant="ghost"
-                  className="size-8 text-red-600 hover:text-red-800 hover:bg-red-600/10"
+                  variant="ghostDestructive"
                 >
                   <Trash2 className="size-4" />
                 </Button>

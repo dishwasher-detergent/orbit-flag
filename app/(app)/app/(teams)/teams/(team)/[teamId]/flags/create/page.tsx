@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { FeatureFlagConditions } from "@/components/feature-flag/conditions";
 import { FeatureFlagVariations } from "@/components/feature-flag/variations";
@@ -44,6 +44,11 @@ export default function CreateFeatureFlagPage() {
       variations: [],
       teamId: teamId,
     },
+  });
+
+  const watchedVariations = useWatch({
+    control: form.control,
+    name: "variations",
   });
 
   const onSubmit = (data: CreateFeatureFlagFormData) => {
@@ -150,7 +155,16 @@ export default function CreateFeatureFlagPage() {
               />
             </section>
             <FeatureFlagVariations control={form.control} />
-            <FeatureFlagConditions control={form.control} />
+            {watchedVariations && watchedVariations.length > 0 ? (
+              <FeatureFlagConditions control={form.control} />
+            ) : (
+              <section>
+                <h2 className="font-semibold text-base">Conditions</h2>
+                <p className="text-sm">
+                  Conditions can only be applied when variations are present.
+                </p>
+              </section>
+            )}
             <div className="flex justify-end space-x-4">
               <Button
                 type="button"

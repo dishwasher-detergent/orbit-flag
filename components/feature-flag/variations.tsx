@@ -171,7 +171,6 @@ export function FeatureFlagVariations({
               name={`${name}.${index}.value`}
               render={({ field }) => {
                 const availableValues = getAvailableValues(index);
-                // Include current field value even if it's already selected
                 const selectOptions =
                   field.value && !availableValues.includes(field.value)
                     ? [...availableValues, field.value]
@@ -221,8 +220,8 @@ export function FeatureFlagVariations({
               type="button"
               onClick={() => remove(index)}
               size="icon"
-              variant="ghost"
-              className="flex-none *:hover:bg-red-600/10 text-red-600 hover:text-red-800"
+              variant="ghostDestructive"
+              className="flex-none"
             >
               <Trash2 className="size-4" />
             </Button>
