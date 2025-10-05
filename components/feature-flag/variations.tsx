@@ -229,16 +229,19 @@ export function FeatureFlagVariations({
           </li>
         ))}
       </ul>
-      <div className="flex justify-center mt-2">
+      <div className="flex justify-center mt-2 mb-3 relative">
         {fields.length < Object.values(FEATURE_FLAG_VALUES).length && (
-          <Button
-            type="button"
-            size="icon"
-            className="size-7"
-            onClick={addVariant}
-          >
-            <LucidePlus className="size-4" />
-          </Button>
+          <>
+            <div className="w-0.5 h-2 left-1/2 -translate-x-1/2 bg-border absolute -top-2" />
+            <Button
+              type="button"
+              size="icon"
+              className="size-7"
+              onClick={addVariant}
+            >
+              <LucidePlus className="size-4" />
+            </Button>
+          </>
         )}
       </div>
     </section>

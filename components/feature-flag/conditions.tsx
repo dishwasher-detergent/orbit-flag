@@ -70,11 +70,6 @@ export function FeatureFlagConditions({
       {errorMessage && (
         <p className="mb-2 text-sm text-destructive">{errorMessage}</p>
       )}
-      <ul className="p-3 bg-muted text-muted-foreground rounded-lg border text-sm space-y-1 list-disc pl-8 mb-2">
-        <li>Conditions are evaluated from top to bottom</li>
-        <li>First matching condition wins</li>
-        <li>Default variation is used if no conditions match</li>
-      </ul>
       <Button type="button" size="sm" onClick={addCondition}>
         <LucidePlus className="size-4" />
         Add Condition
@@ -92,16 +87,11 @@ export function FeatureFlagConditions({
       {errorMessage && (
         <p className="mb-2 text-sm text-destructive">{errorMessage}</p>
       )}
-      <ul className="p-3 bg-muted text-muted-foreground rounded-lg border text-sm space-y-1 list-disc pl-8 mb-2">
-        <li>Conditions are evaluated from top to bottom</li>
-        <li>First matching condition wins</li>
-        <li>Default variation is used if no conditions match</li>
-      </ul>
       <ul className="flex flex-col border rounded-lg bg-sidebar">
         {fields.map((field, index) => (
           <li
             key={field.id}
-            className="w-full p-3 not-last:border-b border-dashed"
+            className="w-full p-2 not-last:border-b border-dashed"
           >
             <div className="flex items-center gap-2 mb-3">
               <div className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs font-semibold">
@@ -126,7 +116,7 @@ export function FeatureFlagConditions({
                 </Button>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="flex flex-row items-start gap-2">
               <FormField
                 control={control}
                 name={`${name}.${index}.contextAttribute`}
@@ -230,7 +220,8 @@ export function FeatureFlagConditions({
           </li>
         ))}
       </ul>
-      <div className="flex justify-center mt-2 mb-3">
+      <div className="flex justify-center my-2 relative">
+        <div className="w-0.5 h-2 left-1/2 -translate-x-1/2 bg-border absolute -top-2" />
         <Button
           type="button"
           size="icon"
@@ -239,6 +230,35 @@ export function FeatureFlagConditions({
         >
           <LucidePlus className="size-4" />
         </Button>
+        <div className="w-0.5 h-2 left-1/2 -translate-x-1/2 bg-border absolute -bottom-2" />
+      </div>
+      <div className="p-3 bg-muted/30 rounded-lg border">
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <div className="text-sm font-medium text-muted-foreground mb-1">
+              Default Variation (fallback)
+            </div>
+            <div className="text-sm">
+              {variations?.find((v) => v.isDefault) ? (
+                <span className="inline-flex items-center gap-2 px-2 py-1 bg-background rounded border">
+                  <span className="font-medium">
+                    {variations.find((v) => v.isDefault)?.name}
+                  </span>
+                  <span className="text-muted-foreground">
+                    ({variations.find((v) => v.isDefault)?.value})
+                  </span>
+                </span>
+              ) : (
+                <span className="text-muted-foreground italic">
+                  No default variation set
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="text-xs text-muted-foreground mt-2">
+          This variation will be served when no conditions match
+        </div>
       </div>
     </section>
   );

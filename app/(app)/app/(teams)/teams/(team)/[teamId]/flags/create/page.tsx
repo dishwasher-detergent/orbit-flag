@@ -91,62 +91,64 @@ export default function CreateFeatureFlagPage() {
           <p>Set up a new feature flag with targeting rules</p>
         </div>
       </div>
-      <section>
+      <div>
         <h2 className="font-semibold text-base mb-2">Details</h2>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="flex flex-row gap-4">
+            <section className="space-y-4">
+              <div className="flex flex-row gap-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Flag Name"
+                          onChange={(e) => {
+                            field.onChange(e);
+                            handleNameChange(e.target.value);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="key"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Key</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="flag_name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
-                name="name"
+                name="description"
                 render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Name</FormLabel>
+                  <FormItem>
+                    <FormLabel>Description (Optional)</FormLabel>
                     <FormControl>
-                      <Input
+                      <Textarea
                         {...field}
-                        placeholder="Flag Name"
-                        onChange={(e) => {
-                          field.onChange(e);
-                          handleNameChange(e.target.value);
-                        }}
+                        placeholder="Describe what this feature flag controls..."
+                        rows={3}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="key"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Key</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="flag_name" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Describe what this feature flag controls..."
-                      rows={3}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            </section>
             <FeatureFlagVariations control={form.control} />
             <FeatureFlagConditions control={form.control} />
             <div className="flex justify-end space-x-4">
@@ -174,7 +176,7 @@ export default function CreateFeatureFlagPage() {
             </div>
           </form>
         </Form>
-      </section>
+      </div>
     </div>
   );
 }
