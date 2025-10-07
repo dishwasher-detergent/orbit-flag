@@ -1,6 +1,6 @@
 "use client";
 
-import { LucidePlus, Trash2 } from "lucide-react";
+import { LucidePlus } from "lucide-react";
 import { Control, useFieldArray, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ export function FeatureFlagVariations({
   control,
   name = "variations",
 }: FeatureFlagVariantsProps) {
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, update } = useFieldArray({
     control,
     name,
   });
@@ -216,15 +216,6 @@ export function FeatureFlagVariations({
                 </FormItem>
               )}
             />
-            <Button
-              type="button"
-              onClick={() => remove(index)}
-              size="icon"
-              variant="ghostDestructive"
-              className="flex-none"
-            >
-              <Trash2 className="size-4" />
-            </Button>
           </li>
         ))}
       </ul>

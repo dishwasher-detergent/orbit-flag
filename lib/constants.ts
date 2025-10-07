@@ -12,6 +12,12 @@ export const USER_COLLECTION_ID = process.env
   .NEXT_PUBLIC_USER_COLLECTION_ID as string;
 export const TEAM_COLLECTION_ID = process.env
   .NEXT_PUBLIC_TEAM_COLLECTION_ID as string;
+export const FLAG_COLLECTION_ID = process.env
+  .NEXT_PUBLIC_FLAG_COLLECTION_ID as string;
+export const VARIATION_COLLECTION_ID = process.env
+  .NEXT_PUBLIC_VARIATION_COLLECTION_ID as string;
+export const CONDITION_COLLECTION_ID = process.env
+  .NEXT_PUBLIC_CONDITION_COLLECTION_ID as string;
 
 // Cookie
 export const COOKIE_KEY = `a_session_${PROJECT_ID}`;

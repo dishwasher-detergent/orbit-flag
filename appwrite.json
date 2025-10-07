@@ -104,6 +104,173 @@
                 }
             ],
             "indexes": []
+        },
+        {
+            "$id": "variation",
+            "$permissions": [],
+            "databaseId": "orbit-flag",
+            "name": "variation",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 32,
+                    "default": null
+                },
+                {
+                    "key": "value",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "true",
+                        "false"
+                    ],
+                    "format": "enum",
+                    "default": null
+                },
+                {
+                    "key": "isDefault",
+                    "type": "boolean",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "condition",
+            "$permissions": [],
+            "databaseId": "orbit-flag",
+            "name": "condition",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "contextAttribute",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "operator",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "equals",
+                        "not_equals",
+                        "contains",
+                        "not_contains",
+                        "in",
+                        "not_in",
+                        "greater_than",
+                        "less_than",
+                        "greater_than_or_equal",
+                        "less_than_or_equal",
+                        "starts_with",
+                        "ends_with"
+                    ],
+                    "format": "enum",
+                    "default": null
+                },
+                {
+                    "key": "values",
+                    "type": "string",
+                    "required": false,
+                    "array": true,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "variationId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 32,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "flag",
+            "$permissions": [],
+            "databaseId": "orbit-flag",
+            "name": "flag",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 512,
+                    "default": null
+                },
+                {
+                    "key": "key",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "status",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "active",
+                        "inactive",
+                        "archived"
+                    ],
+                    "format": "enum",
+                    "default": null
+                },
+                {
+                    "key": "teamId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 32,
+                    "default": null
+                },
+                {
+                    "key": "variationIds",
+                    "type": "string",
+                    "required": false,
+                    "array": true,
+                    "size": 32,
+                    "default": null
+                },
+                {
+                    "key": "conditionIds",
+                    "type": "string",
+                    "required": false,
+                    "array": true,
+                    "size": 32,
+                    "default": null
+                }
+            ],
+            "indexes": []
         }
     ],
     "buckets": [],

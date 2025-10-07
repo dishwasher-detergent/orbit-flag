@@ -1,7 +1,22 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
+import { ID, Permission, Query, Role } from "node-appwrite";
+
+import {
+  Condition,
+  FeatureFlag,
+  Variation,
+} from "@/interfaces/feature-flag.interface";
 import { Result } from "@/interfaces/result.interface";
 import { withAuth } from "@/lib/auth";
+import {
+  CONDITION_COLLECTION_ID,
+  DATABASE_ID,
+  FLAG_COLLECTION_ID,
+  VARIATION_COLLECTION_ID,
+} from "@/lib/constants";
+import { createSessionClient } from "@/lib/server/appwrite";
 import {
   CreateFeatureFlagFormData,
   DeleteFeatureFlagFormData,
@@ -9,62 +24,84 @@ import {
 } from "./schemas";
 
 /**
- * Interface for feature flag data
- */
-export interface FeatureFlagData {
-  $id: string;
-  name: string;
-  key: string;
-  description?: string;
-  enabled: boolean;
-  status: "active" | "inactive" | "archived";
-  defaultValue: boolean;
-  rules: Array<{
-    id?: string;
-    type: string;
-    operator: string;
-    value: string;
-    attribute?: string;
-  }>;
-  teamId: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-}
-
-/**
  * Create a new feature flag
  * @param {CreateFeatureFlagFormData} data The feature flag data
- * @returns {Promise<Result<FeatureFlagData>>} The created feature flag
+ * @returns {Promise<Result<FeatureFlag>>} The created feature flag
  */
 export async function createFeatureFlag(
   data: CreateFeatureFlagFormData
-): Promise<Result<FeatureFlagData>> {
+): Promise<Result<FeatureFlag>> {
   return withAuth(async (user) => {
-    try {
-      // TODO: Implement actual database creation
-      // For now, return a mock response
-      const mockFeatureFlag: FeatureFlagData = {
-        $id: `flag_${Date.now()}`,
-        name: data.name,
-        key: data.key,
-        description: data.description,
-        enabled: data.enabled,
-        status: data.status,
-        defaultValue: data.defaultValue,
-        rules: data.rules,
-        teamId: data.teamId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        createdBy: user.$id,
-      };
+    const { table: database } = await createSessionClient();
 
-      console.log("Creating feature flag:", mockFeatureFlag);
+    try {
+      const variationIds: string[] = [];
+      for (const variation of data.variations) {
+        const variationId = ID.unique();
+        await database.createRow<Variation>({
+          databaseId: DATABASE_ID,
+          tableId: VARIATION_COLLECTION_ID,
+          rowId: variationId,
+          data: {
+            name: variation.name,
+            value: variation.value,
+            isDefault: variation.isDefault,
+          },
+          permissions: [
+            Permission.read(Role.team(data.teamId)),
+            Permission.write(Role.team(data.teamId)),
+          ],
+        });
+        variationIds.push(variationId);
+      }
+
+      const conditionIds: string[] = [];
+      for (const condition of data.conditions || []) {
+        const conditionId = ID.unique();
+        await database.createRow<Condition>({
+          databaseId: DATABASE_ID,
+          tableId: CONDITION_COLLECTION_ID,
+          rowId: conditionId,
+          data: {
+            contextAttribute: condition.contextAttribute,
+            operator: condition.operator,
+            values: condition.values,
+            variationId: condition.variationId,
+          },
+          permissions: [
+            Permission.read(Role.team(data.teamId)),
+            Permission.write(Role.team(data.teamId)),
+          ],
+        });
+        conditionIds.push(conditionId);
+      }
+
+      const flagId = ID.unique();
+      const flag = await database.createRow<FeatureFlag>({
+        databaseId: DATABASE_ID,
+        tableId: FLAG_COLLECTION_ID,
+        rowId: flagId,
+        data: {
+          name: data.name,
+          key: data.key,
+          description: data.description || "",
+          status: data.status,
+          teamId: data.teamId,
+          variationIds,
+          conditionIds,
+        },
+        permissions: [
+          Permission.read(Role.team(data.teamId)),
+          Permission.write(Role.team(data.teamId)),
+        ],
+      });
+
+      revalidateTag(`flags:team-${data.teamId}`);
 
       return {
         success: true,
         message: "Feature flag created successfully",
-        data: mockFeatureFlag,
+        data: flag,
       };
     } catch (error) {
       console.error("Error creating feature flag:", error);
@@ -79,23 +116,63 @@ export async function createFeatureFlag(
 /**
  * Get all feature flags for a team
  * @param {string} teamId The team ID
- * @returns {Promise<Result<FeatureFlagData[]>>} The feature flags
+ * @returns {Promise<Result<FeatureFlag[]>>} The feature flags
  */
 export async function getFeatureFlagsByTeam(
   teamId: string
-): Promise<Result<FeatureFlagData[]>> {
+): Promise<Result<FeatureFlag[]>> {
   return withAuth(async () => {
-    try {
-      // TODO: Implement actual database query
-      // For now, return empty array
-      const mockFeatureFlags: FeatureFlagData[] = [];
+    const { table: database } = await createSessionClient();
 
-      console.log("Getting feature flags for team:", teamId);
+    try {
+      const flags = await database.listRows<FeatureFlag>({
+        databaseId: DATABASE_ID,
+        tableId: FLAG_COLLECTION_ID,
+        queries: [Query.equal("teamId", teamId)],
+      });
+
+      const enrichedFlags: FeatureFlag[] = await Promise.all(
+        flags.rows.map(async (flag: FeatureFlag) => {
+          const variations = await Promise.all(
+            (flag.variationIds || []).map(async (variationId: string) => {
+              try {
+                return await database.getRow<Variation>({
+                  databaseId: DATABASE_ID,
+                  tableId: VARIATION_COLLECTION_ID,
+                  rowId: variationId,
+                });
+              } catch {
+                return null;
+              }
+            })
+          );
+
+          const conditions = await Promise.all(
+            (flag.conditionIds || []).map(async (conditionId: string) => {
+              try {
+                return await database.getRow<Condition>({
+                  databaseId: DATABASE_ID,
+                  tableId: CONDITION_COLLECTION_ID,
+                  rowId: conditionId,
+                });
+              } catch {
+                return null;
+              }
+            })
+          );
+
+          return {
+            ...flag,
+            variations: variations.filter((x) => x !== null),
+            conditions: conditions.filter((x) => x !== null),
+          };
+        })
+      );
 
       return {
         success: true,
         message: "Feature flags retrieved successfully",
-        data: mockFeatureFlags,
+        data: enrichedFlags,
       };
     } catch (error) {
       console.error("Error getting feature flags:", error);
@@ -110,36 +187,59 @@ export async function getFeatureFlagsByTeam(
 /**
  * Get a feature flag by ID
  * @param {string} id The feature flag ID
- * @returns {Promise<Result<FeatureFlagData>>} The feature flag
+ * @returns {Promise<Result<FeatureFlag>>} The feature flag
  */
 export async function getFeatureFlagById(
   id: string
-): Promise<Result<FeatureFlagData>> {
+): Promise<Result<FeatureFlag>> {
   return withAuth(async () => {
-    try {
-      // TODO: Implement actual database query
-      // For now, return a mock response
-      const mockFeatureFlag: FeatureFlagData = {
-        $id: id,
-        name: "Sample Feature Flag",
-        key: "sample_flag",
-        description: "This is a sample feature flag",
-        enabled: false,
-        status: "inactive",
-        defaultValue: false,
-        rules: [],
-        teamId: "team_123",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        createdBy: "user_123",
-      };
+    const { table: database } = await createSessionClient();
 
-      console.log("Getting feature flag by ID:", id);
+    try {
+      const flag = await database.getRow<FeatureFlag>({
+        databaseId: DATABASE_ID,
+        tableId: FLAG_COLLECTION_ID,
+        rowId: id,
+      });
+
+      const variations = await Promise.all(
+        (flag.variationIds || []).map(async (variationId: string) => {
+          try {
+            return await database.getRow<Variation>({
+              databaseId: DATABASE_ID,
+              tableId: VARIATION_COLLECTION_ID,
+              rowId: variationId,
+            });
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      const conditions = await Promise.all(
+        (flag.conditionIds || []).map(async (conditionId: string) => {
+          try {
+            return await database.getRow<Condition>({
+              databaseId: DATABASE_ID,
+              tableId: CONDITION_COLLECTION_ID,
+              rowId: conditionId,
+            });
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      const enrichedFlag: FeatureFlag = {
+        ...flag,
+        variations: variations.filter((x) => x !== null),
+        conditions: conditions.filter((x) => x !== null),
+      };
 
       return {
         success: true,
         message: "Feature flag retrieved successfully",
-        data: mockFeatureFlag,
+        data: enrichedFlag,
       };
     } catch (error) {
       console.error("Error getting feature flag:", error);
@@ -154,36 +254,107 @@ export async function getFeatureFlagById(
 /**
  * Update a feature flag
  * @param {EditFeatureFlagFormData} data The feature flag data
- * @returns {Promise<Result<FeatureFlagData>>} The updated feature flag
+ * @returns {Promise<Result<FeatureFlag>>} The updated feature flag
  */
 export async function updateFeatureFlag(
   data: EditFeatureFlagFormData
-): Promise<Result<FeatureFlagData>> {
+): Promise<Result<FeatureFlag>> {
   return withAuth(async (user) => {
-    try {
-      // TODO: Implement actual database update
-      // For now, return a mock response
-      const mockFeatureFlag: FeatureFlagData = {
-        $id: data.id,
-        name: data.name,
-        key: data.key,
-        description: data.description,
-        enabled: data.enabled,
-        status: data.status,
-        defaultValue: data.defaultValue,
-        rules: data.rules,
-        teamId: data.teamId,
-        createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-        updatedAt: new Date().toISOString(),
-        createdBy: user.$id,
-      };
+    const { table: database } = await createSessionClient();
 
-      console.log("Updating feature flag:", mockFeatureFlag);
+    try {
+      const existingFlag = await database.getRow<FeatureFlag>({
+        databaseId: DATABASE_ID,
+        tableId: FLAG_COLLECTION_ID,
+        rowId: data.id,
+      });
+
+      for (const variationId of existingFlag.variationIds || []) {
+        try {
+          await database.deleteRow({
+            databaseId: DATABASE_ID,
+            tableId: VARIATION_COLLECTION_ID,
+            rowId: variationId,
+          });
+        } catch {
+          console.error("Variation might already be deleted");
+        }
+      }
+
+      for (const conditionId of existingFlag.conditionIds || []) {
+        try {
+          await database.deleteRow({
+            databaseId: DATABASE_ID,
+            tableId: CONDITION_COLLECTION_ID,
+            rowId: conditionId,
+          });
+        } catch {
+          console.error("Condition might already be deleted");
+        }
+      }
+
+      const variationIds: string[] = [];
+      for (const variation of data.variations) {
+        const variationId = ID.unique();
+        await database.createRow<Variation>({
+          databaseId: DATABASE_ID,
+          tableId: VARIATION_COLLECTION_ID,
+          rowId: variationId,
+          data: {
+            name: variation.name,
+            value: variation.value,
+            isDefault: variation.isDefault,
+          },
+          permissions: [
+            Permission.read(Role.team(data.teamId)),
+            Permission.write(Role.team(data.teamId)),
+          ],
+        });
+        variationIds.push(variationId);
+      }
+
+      const conditionIds: string[] = [];
+      for (const condition of data.conditions || []) {
+        const conditionId = ID.unique();
+        await database.createRow<Condition>({
+          databaseId: DATABASE_ID,
+          tableId: CONDITION_COLLECTION_ID,
+          rowId: conditionId,
+          data: {
+            contextAttribute: condition.contextAttribute,
+            operator: condition.operator,
+            values: condition.values,
+            variationId: condition.variationId,
+          },
+          permissions: [
+            Permission.read(Role.team(data.teamId)),
+            Permission.write(Role.team(data.teamId)),
+          ],
+        });
+        conditionIds.push(conditionId);
+      }
+
+      const updatedFlag = await database.updateRow<FeatureFlag>({
+        databaseId: DATABASE_ID,
+        tableId: FLAG_COLLECTION_ID,
+        rowId: data.id,
+        data: {
+          name: data.name,
+          key: data.key,
+          description: data.description || "",
+          status: data.status,
+          teamId: data.teamId,
+          variationIds,
+          conditionIds,
+        },
+      });
+
+      revalidateTag(`flags:team-${data.teamId}`);
 
       return {
         success: true,
         message: "Feature flag updated successfully",
-        data: mockFeatureFlag,
+        data: updatedFlag,
       };
     } catch (error) {
       console.error("Error updating feature flag:", error);
@@ -204,9 +375,46 @@ export async function deleteFeatureFlag(
   data: DeleteFeatureFlagFormData
 ): Promise<Result<void>> {
   return withAuth(async () => {
+    const { table: database } = await createSessionClient();
+
     try {
-      // TODO: Implement actual database deletion
-      console.log("Deleting feature flag:", data);
+      const flag = await database.getRow({
+        databaseId: DATABASE_ID,
+        tableId: FLAG_COLLECTION_ID,
+        rowId: data.id,
+      });
+
+      for (const variationId of flag.variationIds || []) {
+        try {
+          await database.deleteRow({
+            databaseId: DATABASE_ID,
+            tableId: VARIATION_COLLECTION_ID,
+            rowId: variationId,
+          });
+        } catch {
+          console.error("Variation might already be deleted");
+        }
+      }
+
+      for (const conditionId of flag.conditionIds || []) {
+        try {
+          await database.deleteRow({
+            databaseId: DATABASE_ID,
+            tableId: CONDITION_COLLECTION_ID,
+            rowId: conditionId,
+          });
+        } catch {
+          console.error("Condition might already be deleted");
+        }
+      }
+
+      await database.deleteRow({
+        databaseId: DATABASE_ID,
+        tableId: FLAG_COLLECTION_ID,
+        rowId: data.id,
+      });
+
+      revalidateTag(`flags:team-${flag.teamId}`);
 
       return {
         success: true,
@@ -224,40 +432,40 @@ export async function deleteFeatureFlag(
 }
 
 /**
- * Toggle feature flag enabled status
+ * Toggle feature flag status
  * @param {string} id The feature flag ID
- * @param {boolean} enabled The new enabled status
- * @returns {Promise<Result<FeatureFlagData>>} The updated feature flag
+ * @param {string} status The new status (active/inactive/archived)
+ * @returns {Promise<Result<FeatureFlag>>} The updated feature flag
  */
 export async function toggleFeatureFlag(
   id: string,
-  enabled: boolean
-): Promise<Result<FeatureFlagData>> {
+  status: string
+): Promise<Result<FeatureFlag>> {
   return withAuth(async (user) => {
-    try {
-      // TODO: Implement actual database update
-      // For now, return a mock response
-      const mockFeatureFlag: FeatureFlagData = {
-        $id: id,
-        name: "Sample Feature Flag",
-        key: "sample_flag",
-        description: "This is a sample feature flag",
-        enabled,
-        status: enabled ? "active" : "inactive",
-        defaultValue: false,
-        rules: [],
-        teamId: "team_123",
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-        updatedAt: new Date().toISOString(),
-        createdBy: user.$id,
-      };
+    const { table: database } = await createSessionClient();
 
-      console.log("Toggling feature flag:", { id, enabled });
+    try {
+      const updatedFlag = await database.updateRow<FeatureFlag>({
+        databaseId: DATABASE_ID,
+        tableId: FLAG_COLLECTION_ID,
+        rowId: id,
+        data: {
+          status,
+        },
+      });
+
+      const flag = await database.getRow<FeatureFlag>({
+        databaseId: DATABASE_ID,
+        tableId: FLAG_COLLECTION_ID,
+        rowId: id,
+      });
+
+      revalidateTag(`flags:team-${flag.teamId}`);
 
       return {
         success: true,
-        message: "Feature flag toggled successfully",
-        data: mockFeatureFlag,
+        message: "Feature flag status updated successfully",
+        data: updatedFlag,
       };
     } catch (error) {
       console.error("Error toggling feature flag:", error);

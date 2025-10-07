@@ -40,8 +40,28 @@ export default function CreateFeatureFlagPage() {
       key: "",
       description: "",
       status: FEATURE_FLAG_STATUS.INACTIVE,
-      defaultValue: false,
-      variations: [],
+      variations: [
+        {
+          id: `default_variation_true`,
+          name: "True",
+          value: "true",
+          isDefault: true,
+        },
+        {
+          id: `default_variation_false`,
+          name: "False",
+          value: "false",
+          isDefault: false,
+        },
+      ],
+      conditions: [
+        {
+          contextAttribute: "",
+          operator: undefined,
+          values: [],
+          variationId: "",
+        },
+      ],
       teamId: teamId,
     },
   });
@@ -61,7 +81,7 @@ export default function CreateFeatureFlagPage() {
         const result = await createFeatureFlag(formData);
 
         if (result.success) {
-          router.push(`/app/teams/${teamId}/flags`);
+          // router.push(`/app/teams/${teamId}/flags`);
         } else {
           console.error("Failed to create feature flag:", result.message);
         }

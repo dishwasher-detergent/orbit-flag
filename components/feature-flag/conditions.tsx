@@ -1,6 +1,6 @@
 "use client";
 
-import { LucidePlus, Trash2 } from "lucide-react";
+import { LucideMinus, LucidePlus } from "lucide-react";
 import { Control, useFieldArray } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import { FEATURE_FLAG_OPERATORS } from "@/constants/feature-flag.constants";
 import { Conditions, Variations } from "@/lib/feature-flag/schemas";
 import { useMemo } from "react";
 import { useWatch } from "react-hook-form";
+import MultipleSelector from "../ui/multiple-selector";
 
 interface FeatureFlagConditionsProps {
   control: Control<any>;
@@ -45,10 +46,9 @@ export function FeatureFlagConditions({
 
   const addCondition = () => {
     const newCondition: Conditions = {
-      id: `condition_${Date.now()}`,
       contextAttribute: "",
       operator: FEATURE_FLAG_OPERATORS.EQUALS,
-      values: "",
+      values: [],
       variationId: "",
     };
     append(newCondition);
@@ -91,10 +91,10 @@ export function FeatureFlagConditions({
         {fields.map((field, index) => (
           <li
             key={field.id}
-            className="w-full p-2 not-last:border-b border-dashed"
+            className="w-full p-2 not-last:border-b border-dashed not-last:pb-8 relative"
           >
             <div className="flex items-center gap-2 mb-3">
-              <div className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs font-semibold">
+              <div className="flex items-center justify-center size-8 bg-muted text-muted-foreground rounded-lg text-xs font-semibold">
                 {index + 1}
               </div>
               <span className="text-sm text-muted-foreground">
@@ -104,16 +104,6 @@ export function FeatureFlagConditions({
                   ? "Last condition (before default)"
                   : `Priority ${index + 1}`}
               </span>
-              <div className="ml-auto">
-                <Button
-                  type="button"
-                  onClick={() => remove(index)}
-                  size="icon"
-                  variant="ghostDestructive"
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </div>
             </div>
             <div className="flex flex-row items-start gap-2">
               <FormField
@@ -166,13 +156,28 @@ export function FeatureFlagConditions({
                 control={control}
                 name={`${name}.${index}.values`}
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex-1">
                     <FormLabel>Values</FormLabel>
                     <FormControl>
-                      <Input
-                        className="bg-background"
-                        placeholder="e.g., admin,premium or user123"
-                        {...field}
+                      <MultipleSelector
+                        value={
+                          field.value?.map((val: string) => ({
+                            value: val,
+                            label: val,
+                          })) || []
+                        }
+                        onChange={(
+                          selected: { value: string; label: string }[]
+                        ) => {
+                          field.onChange(selected.map((item) => item.value));
+                        }}
+                        creatable
+                        placeholder="Add values"
+                        emptyIndicator={
+                          <p className="text-muted-foreground text-center text-sm leading-4 font-semibold">
+                            No values found.
+                          </p>
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -216,6 +221,19 @@ export function FeatureFlagConditions({
                 )}
               />
             </div>
+            {fields.length > 1 && index != fields.length - 1 && (
+              <div className="z-10 left-1/2 -translate-x-1/2 -bottom-5 absolute bg-background border border-dashed p-1 rounded-lg">
+                <Button
+                  type="button"
+                  onClick={() => remove(index)}
+                  size="icon"
+                  variant="destructive"
+                  className="size-7"
+                >
+                  <LucideMinus className="size-4" />
+                </Button>
+              </div>
+            )}
           </li>
         ))}
       </ul>
@@ -234,9 +252,12 @@ export function FeatureFlagConditions({
       <div className="p-3 bg-muted/30 rounded-lg border">
         <div className="flex items-center gap-2">
           <div className="flex-1">
-            <div className="text-sm font-medium text-muted-foreground mb-1">
+            <p className="text-sm font-medium text-muted-foreground mb-1">
               Default Variation (fallback)
-            </div>
+            </p>
+            <p className="text-xs text-muted-foreground mb-2">
+              This variation will be served when no conditions match
+            </p>
             <div className="text-sm">
               {variations?.find((v) => v.isDefault) ? (
                 <span className="inline-flex items-center gap-2 px-2 py-1 bg-background rounded border">
@@ -254,9 +275,6 @@ export function FeatureFlagConditions({
               )}
             </div>
           </div>
-        </div>
-        <div className="text-xs text-muted-foreground mt-2">
-          This variation will be served when no conditions match
         </div>
       </div>
     </section>
