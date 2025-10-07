@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -87,15 +87,10 @@ export default function CreateFeatureFlagPage() {
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Create Feature Flag</h1>
-          <p>Set up a new feature flag with targeting rules</p>
-        </div>
-      </div>
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold">Create Feature Flag</h1>
+        <p>Set up a new feature flag with targeting rules</p>
+      </header>
       <div>
         <h2 className="font-semibold text-base mb-2">Details</h2>
         <Form {...form}>
