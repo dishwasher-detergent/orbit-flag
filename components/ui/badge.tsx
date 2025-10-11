@@ -17,13 +17,9 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 border-1 border-[color-mix(in_srgb,var(--color-destructive)_80%,black)] dark:border-[color-mix(in_srgb,var(--color-destructive)_80%,white)]",
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-        critical: "bg-rose-600/80 text-white border-1 border-rose-600",
-        high: "bg-rose-600/80 text-white border-1 border-rose-600",
-        medium: "bg-amber-600/80 text-white border-1 border-amber-600",
-        low: "bg-emerald-600/80 text-white border-1 border-emerald-600",
-        accessibility: "bg-violet-600/80 text-white border-1 border-violet-600",
-        ui: "bg-pink-600/80 text-white border-1 border-pink-600",
-        ux: "bg-cyan-600/80 text-white border-1 border-cyan-600",
+        active: "bg-emerald-600/80 text-white border-1 border-emerald-600",
+        inactive: "bg-amber-600/80 text-white border-1 border-amber-600",
+        archived: "bg-rose-600/80 text-white border-1 border-rose-600",
       },
     },
     defaultVariants: {

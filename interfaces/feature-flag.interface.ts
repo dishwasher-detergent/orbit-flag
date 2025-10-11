@@ -4,7 +4,7 @@ export interface FeatureFlag extends Models.Row {
   name: string;
   key: string;
   description: string;
-  status: string;
+  status: "active" | "inactive" | "archived";
   teamId: string;
   variationIds: string[];
   variations?: Variation[];

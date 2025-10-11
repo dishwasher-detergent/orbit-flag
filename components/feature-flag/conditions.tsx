@@ -94,7 +94,7 @@ export function FeatureFlagConditions({
             className="w-full p-2 not-last:border-b border-dashed not-last:pb-8 relative"
           >
             <div className="flex items-center gap-2 mb-3">
-              <div className="flex items-center justify-center size-8 bg-muted text-muted-foreground rounded-lg text-xs font-semibold">
+              <div className="flex items-center justify-center size-8 bg-background border text-muted-foreground rounded-lg text-xs font-semibold">
                 {index + 1}
               </div>
               <span className="text-sm text-muted-foreground">

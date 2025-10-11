@@ -439,7 +439,7 @@ export async function deleteFeatureFlag(
  */
 export async function toggleFeatureFlag(
   id: string,
-  status: string
+  status: "active" | "inactive" | "archived"
 ): Promise<Result<FeatureFlag>> {
   return withAuth(async (user) => {
     const { table: database } = await createSessionClient();
