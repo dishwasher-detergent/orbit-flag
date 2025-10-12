@@ -44,7 +44,7 @@ export function DeleteFeatureFlag({
       setOpen={setOpen}
       button={
         <Button
-          onClick={() => {
+          onClick={(e) => {
             setOpen(!open);
           }}
           size="sm"
@@ -78,19 +78,26 @@ function DeleteForm({ className, setOpen, flag, teamId }: FormProps) {
   });
 
   const onSubmit = async (data: DeleteFeatureFlagFormData) => {
-    try {
-      const result = await deleteFeatureFlag(data);
+    if (data.name !== flag.name) {
+      form.setError("name", {
+        message: "Name does not match.",
+      });
 
-      if (result.success) {
-        toast.success("Feature flag deleted successfully");
-        setOpen(false);
-        router.push(`/app/teams/${teamId}/flags`);
-      } else {
-        toast.error(result.message || "Failed to delete feature flag");
-      }
-    } catch (error) {
-      console.error("Error deleting feature flag:", error);
-      toast.error("An unexpected error occurred");
+      toast.error("Name does not match.");
+      return;
+    }
+
+    const result = await deleteFeatureFlag(data);
+
+    if (result.success) {
+      toast.success("Feature flag deleted successfully");
+      setOpen(false);
+
+      console.log("test");
+
+      router.push(`/app/teams/${teamId}/flags`);
+    } else {
+      toast.error(result.message);
     }
   };
 
@@ -120,7 +127,10 @@ function DeleteForm({ className, setOpen, flag, teamId }: FormProps) {
         </div>
         <Button
           className="sticky bottom-0"
-          type="submit"
+          onClick={(e) => {
+            e.preventDefault();
+            form.handleSubmit(onSubmit)();
+          }}
           variant="destructive"
           disabled={
             form.formState.isSubmitting ||

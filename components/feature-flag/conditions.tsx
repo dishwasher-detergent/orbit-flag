@@ -91,7 +91,7 @@ export function FeatureFlagConditions({
         {fields.map((field, index) => (
           <li
             key={field.id}
-            className="w-full p-2 not-last:border-b border-dashed not-last:pb-8 relative"
+            className="w-full p-1 not-last:border-b border-dashed not-last:pb-8 relative"
           >
             <div className="flex items-center gap-2 mb-3">
               <div className="flex items-center justify-center size-8 bg-background border text-muted-foreground rounded-lg text-xs font-semibold">
@@ -249,18 +249,18 @@ export function FeatureFlagConditions({
         </Button>
         <div className="w-0.5 h-2 left-1/2 -translate-x-1/2 bg-border absolute -bottom-2" />
       </div>
-      <div className="p-3 bg-muted/30 rounded-lg border">
+      <div className="p-1 pt-2 bg-muted/30 rounded-lg border">
         <div className="flex items-center gap-2">
           <div className="flex-1">
-            <p className="text-sm font-medium text-muted-foreground mb-1">
+            <p className="text-sm font-medium text-muted-foreground mb-1 px-1">
               Default Variation (fallback)
             </p>
-            <p className="text-xs text-muted-foreground mb-2">
+            <p className="text-xs text-muted-foreground mb-2 px-1">
               This variation will be served when no conditions match
             </p>
             <div className="text-sm">
               {variations?.find((v) => v.isDefault) ? (
-                <span className="inline-flex items-center gap-2 px-2 py-1 bg-background rounded border">
+                <span className="inline-flex items-center gap-2 px-2 py-1 bg-background rounded-lg border">
                   <span className="font-medium">
                     {variations.find((v) => v.isDefault)?.name}
                   </span>

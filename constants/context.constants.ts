@@ -1,0 +1,1 @@
+export const CONTEXT_ATTRIBUTE_MAX_LENGTH = 1024;

@@ -26,7 +26,7 @@ export default async function FlagsPage({
     <div className="space-y-6 p-4 max-w-6xl mx-auto w-full">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Create Feature Flag</h1>
+          <h1 className="text-2xl font-bold">Feature Flags</h1>
           <p className="text-muted-foreground">
             Manage feature flags and targeting rules for your application
           </p>

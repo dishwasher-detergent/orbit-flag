@@ -1,11 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Pause, Play, Save } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useTransition } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import { FeatureFlagConditions } from "@/components/feature-flag/conditions";
@@ -21,107 +21,102 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { FeatureFlag } from "@/interfaces/feature-flag.interface";
-import { toggleFeatureFlag, updateFeatureFlag } from "@/lib/feature-flag";
+import { FEATURE_FLAG_STATUS } from "@/constants/feature-flag.constants";
+import { createFeatureFlag } from "@/lib/feature-flag";
 import {
-  EditFeatureFlagFormData,
-  editFeatureFlagSchema,
+  CreateFeatureFlagFormData,
+  createFeatureFlagSchema,
 } from "@/lib/feature-flag/schemas";
-import { DeleteFeatureFlag } from "./delete";
 
-interface EditFeatureFlagFormProps {
-  flag: FeatureFlag;
+interface CreateFeatureFlagFormProps {
   teamId: string;
 }
 
-export function EditFeatureFlagForm({
-  flag,
-  teamId,
-}: EditFeatureFlagFormProps) {
+export function CreateFeatureFlagForm({ teamId }: CreateFeatureFlagFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [isToggling, setIsToggling] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState(flag.status);
 
-  const form = useForm<EditFeatureFlagFormData>({
-    resolver: zodResolver(editFeatureFlagSchema),
+  const form = useForm<CreateFeatureFlagFormData>({
+    resolver: zodResolver(createFeatureFlagSchema),
     defaultValues: {
-      id: flag.$id,
-      name: flag.name,
-      key: flag.key,
-      description: flag.description || "",
-      status: flag.status as any,
-      variations: (flag.variations || []).map((v: any) => ({
-        id: v.$id,
-        name: v.name,
-        value: v.value as "true" | "false",
-        isDefault: v.isDefault,
-      })),
-      conditions: (flag.conditions || []).map((c: any) => ({
-        id: c.$id,
-        contextAttribute: c.contextAttribute,
-        operator: c.operator,
-        values: c.values,
-        variationId: c.variationId,
-      })),
-      teamId: flag.teamId,
+      name: "",
+      key: "",
+      description: "",
+      status: FEATURE_FLAG_STATUS.INACTIVE,
+      variations: [
+        {
+          id: `default_variation_true`,
+          name: "True",
+          value: "true",
+          isDefault: true,
+        },
+        {
+          id: `default_variation_false`,
+          name: "False",
+          value: "false",
+          isDefault: false,
+        },
+      ],
+      conditions: [
+        {
+          contextAttribute: "",
+          operator: undefined,
+          values: [],
+          variationId: "",
+        },
+      ],
+      teamId: teamId,
     },
   });
 
-  const onSubmit = (data: EditFeatureFlagFormData) => {
+  const watchedVariations = useWatch({
+    control: form.control,
+    name: "variations",
+  });
+
+  const onSubmit = (data: CreateFeatureFlagFormData) => {
     startTransition(async () => {
-      const result = await updateFeatureFlag(data);
+      const formData = {
+        ...data,
+      };
+
+      const result = await createFeatureFlag(formData);
 
       if (result.success) {
         toast.success(result.message);
-        router.push(`/app/teams/${teamId}/flags/${flag.$id}`);
+        router.push(`/app/teams/${teamId}/flags/${result.data?.$id}`);
       } else {
         toast.error(result.message);
       }
     });
   };
 
-  const handleToggleStatus = async () => {
-    setIsToggling(true);
-
-    const newStatus = currentStatus === "active" ? "inactive" : "active";
-
-    try {
-      const result = await toggleFeatureFlag(flag.$id, newStatus);
-
-      if (result.success) {
-        setCurrentStatus(newStatus);
-        // Update the form status as well
-        form.setValue("status", newStatus as any);
-        toast.success(
-          `Feature flag ${
-            newStatus === "active" ? "activated" : "deactivated"
-          } successfully`
-        );
-      } else {
-        toast.error(result.message);
-      }
-    } catch (error) {
-      toast.error("Failed to update feature flag status");
-    } finally {
-      setIsToggling(false);
-    }
+  const generateKeyFromName = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/\s+/g, "_")
+      .substring(0, 50);
   };
 
-  const watchedVariations = form.watch("variations");
+  const handleNameChange = (name: string) => {
+    if (!form.getFieldState("key").isTouched) {
+      form.setValue("key", generateKeyFromName(name));
+    }
+  };
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold">Edit Feature Flag</h1>
-        <p>Update your feature flag with targeting rules</p>
+        <h1 className="text-2xl font-bold">Create Feature Flag</h1>
+        <p>Set up a new feature flag with targeting rules</p>
       </header>
       <div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <section>
               <h2 className="font-semibold text-base mb-2">Details</h2>
-              <div className="flex flex-col gap-4 border rounded-lg bg-sidebar p-2 pt-3">
+              <div className="flex flex-col gap-4 border rounded-lg bg-sidebar p-1 pt-2">
                 <div className="flex flex-row gap-4">
                   <FormField
                     control={form.control}
@@ -134,6 +129,10 @@ export function EditFeatureFlagForm({
                             {...field}
                             placeholder="Flag Name"
                             className="bg-background"
+                            onChange={(e) => {
+                              field.onChange(e);
+                              handleNameChange(e.target.value);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -179,64 +178,35 @@ export function EditFeatureFlagForm({
               </div>
             </section>
             <FeatureFlagVariations control={form.control} />
-            {watchedVariations && watchedVariations.length > 0 && (
+            {watchedVariations && watchedVariations.length > 0 ? (
               <FeatureFlagConditions control={form.control} />
+            ) : (
+              <section>
+                <h2 className="font-semibold text-base">Conditions</h2>
+                <p className="text-sm">
+                  Conditions can only be applied when variations are present.
+                </p>
+              </section>
             )}
             <div className="flex justify-end space-x-4">
               <Button
                 type="button"
-                variant="ghost"
-                size="sm"
+                variant="outline"
                 disabled={isPending}
                 asChild
               >
                 <Link href={`/app/teams/${teamId}/flags`}>Cancel</Link>
               </Button>
-              <DeleteFeatureFlag flag={flag} teamId={teamId} />
-              <Button
-                type="button"
-                variant={currentStatus === "active" ? "destructive" : "outline"}
-                disabled={isPending || isToggling}
-                onClick={handleToggleStatus}
-                size="sm"
-              >
-                {isToggling ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    {currentStatus === "active"
-                      ? "Deactivating..."
-                      : "Activating..."}
-                  </>
-                ) : (
-                  <>
-                    {currentStatus === "active" ? (
-                      <>
-                        <Pause className="size-4" />
-                        Deactivate
-                      </>
-                    ) : (
-                      <>
-                        <Play className="size-4" />
-                        Activate
-                      </>
-                    )}
-                  </>
-                )}
-              </Button>
-              <Button
-                type="submit"
-                disabled={isPending || isToggling}
-                size="sm"
-              >
+              <Button type="submit" disabled={isPending}>
                 {isPending ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    Updating...
+                    Creating...
                   </>
                 ) : (
                   <>
                     <Save className="size-4" />
-                    Update Feature Flag
+                    Create Feature Flag
                   </>
                 )}
               </Button>

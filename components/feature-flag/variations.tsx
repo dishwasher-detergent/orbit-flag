@@ -135,7 +135,7 @@ export function FeatureFlagVariations({
         {fields.map((field, index) => (
           <li
             key={field.id}
-            className="w-full flex items-start gap-2 p-2 pt-3 not-last:border-b border-dashed"
+            className="w-full flex items-start gap-2 p-1 pt-2 not-last:border-b border-dashed"
           >
             <FormField
               control={control}
