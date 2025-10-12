@@ -83,7 +83,7 @@ async function evaluateFlag(
   flagKey: string,
   context: Record<string, any>
 ): Promise<NextResponse<EvaluateResponse>> {
-  const isWhitelisted = true; //await checkWhitelist(request, teamId);
+  const isWhitelisted = await checkWhitelist(request, teamId);
   if (!isWhitelisted) {
     return NextResponse.json(
       {
