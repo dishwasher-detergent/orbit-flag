@@ -177,13 +177,7 @@ export function EditFeatureFlagForm({
           <FeatureFlagConditions control={form.control} />
         )}
         <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={isPending}
-            asChild
-          >
+          <Button type="button" variant="ghost" disabled={isPending} asChild>
             <Link href={`/app/teams/${teamId}/flags`}>Cancel</Link>
           </Button>
           <DeleteFeatureFlag flag={flag} teamId={teamId} />
@@ -192,7 +186,6 @@ export function EditFeatureFlagForm({
             variant={currentStatus === "active" ? "destructive" : "outline"}
             disabled={isPending || isToggling}
             onClick={handleToggleStatus}
-            size="sm"
           >
             {isToggling ? (
               <>
@@ -217,7 +210,7 @@ export function EditFeatureFlagForm({
               </>
             )}
           </Button>
-          <Button type="submit" disabled={isPending || isToggling} size="sm">
+          <Button type="submit" disabled={isPending || isToggling}>
             {isPending ? (
               <>
                 <Loader2 className="size-4 animate-spin" />

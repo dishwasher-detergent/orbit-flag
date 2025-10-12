@@ -70,7 +70,7 @@ export function FeatureFlagConditions({
       {errorMessage && (
         <p className="mb-2 text-sm text-destructive">{errorMessage}</p>
       )}
-      <Button type="button" size="sm" onClick={addCondition}>
+      <Button type="button" onClick={addCondition}>
         <LucidePlus className="size-4" />
         Add Condition
       </Button>

@@ -17,11 +17,11 @@ export default async function Home() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             {user ? (
-              <Button size="sm" asChild>
+              <Button asChild>
                 <Link href="/app">Go to App</Link>
               </Button>
             ) : (
-              <Button size="sm" asChild>
+              <Button asChild>
                 <Link href="/signup">Sign Up</Link>
               </Button>
             )}

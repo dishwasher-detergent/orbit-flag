@@ -80,7 +80,6 @@ export function WhitelistForm({ team }: WhitelistFormProps) {
         <Button
           type="button"
           variant="outline"
-          size="sm"
           onClick={addDomain}
           disabled={isPending}
         >

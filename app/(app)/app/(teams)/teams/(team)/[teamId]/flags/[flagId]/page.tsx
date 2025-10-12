@@ -36,7 +36,7 @@ export default async function EditFeatureFlagPage({
         description="Modify the settings for this feature flag."
         icon={Pencil}
       />
-      <EditFeatureFlagForm flag={flag} teamId={teamId} />;
+      <EditFeatureFlagForm flag={flag} teamId={teamId} />
     </>
   );
 }

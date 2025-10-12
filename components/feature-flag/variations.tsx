@@ -114,7 +114,7 @@ export function FeatureFlagVariations({
       {errorMessage && (
         <p className="mb-2 text-sm text-destructive">{errorMessage}</p>
       )}
-      <Button type="button" size="sm" onClick={addVariant}>
+      <Button type="button" onClick={addVariant}>
         <LucidePlus className="size-4" />
         Add Variant
       </Button>

@@ -40,7 +40,6 @@ export function DeleteTeam({ team }: { team: TeamData }) {
           onClick={() => {
             setOpen(!open);
           }}
-          size="sm"
           variant="secondary"
         >
           Delete Team

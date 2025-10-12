@@ -36,7 +36,6 @@ export function InviteTeam({ team }: { team: TeamData }) {
           onClick={() => {
             setOpen(!open);
           }}
-          size="sm"
           variant="secondary"
         >
           Add Member

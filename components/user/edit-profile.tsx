@@ -44,7 +44,6 @@ export function EditProfile({ user }: { user: UserData }) {
             setOpen(!open);
           }}
           variant="secondary"
-          size="sm"
         >
           Edit
           <LucidePencil className="size-3.5" />

@@ -47,7 +47,6 @@ export function DeleteFeatureFlag({
           onClick={(e) => {
             setOpen(!open);
           }}
-          size="sm"
           variant="destructive"
         >
           Delete Flag

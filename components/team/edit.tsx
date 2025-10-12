@@ -43,7 +43,6 @@ export function EditTeam({ team }: { team: TeamData }) {
           onClick={() => {
             setOpen(!open);
           }}
-          size="sm"
           variant="secondary"
         >
           Edit Team

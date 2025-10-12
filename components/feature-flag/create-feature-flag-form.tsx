@@ -183,16 +183,10 @@ export function CreateFeatureFlagForm({ teamId }: CreateFeatureFlagFormProps) {
           </section>
         )}
         <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={isPending}
-            asChild
-          >
+          <Button type="button" variant="outline" disabled={isPending} asChild>
             <Link href={`/app/teams/${teamId}/flags`}>Cancel</Link>
           </Button>
-          <Button type="submit" disabled={isPending} size="sm">
+          <Button type="submit" disabled={isPending}>
             {isPending ? (
               <>
                 <Loader2 className="size-4 animate-spin" />

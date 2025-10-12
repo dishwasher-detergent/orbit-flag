@@ -31,7 +31,7 @@ export default async function FlagsPage({
         description="Manage feature flags and targeting rules for your application"
       >
         {success && featureFlags && featureFlags.length > 0 && (
-          <Button size="sm" asChild>
+          <Button asChild>
             <Link href={`/app/teams/${teamId}/flags/create`}>
               <Plus className="size-4" />
               Create Flag

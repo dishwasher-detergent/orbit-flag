@@ -34,7 +34,7 @@ export function LeaveTeam({ team }: { team: TeamData }) {
       open={open}
       setOpen={setOpen}
       button={
-        <Button onClick={() => setOpen(true)} size="sm" variant="secondary">
+        <Button onClick={() => setOpen(true)} variant="secondary">
           Leave Team
           <LucideDoorOpen className="size-3.5" />
         </Button>
