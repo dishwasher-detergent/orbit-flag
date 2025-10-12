@@ -36,6 +36,8 @@ export async function createFeatureFlag(
 
     try {
       const variationIds: string[] = [];
+      const variationIdMap: Map<string, string> = new Map();
+
       for (const variation of data.variations) {
         const variationId = ID.unique();
         await database.createRow<Variation>({
@@ -53,11 +55,19 @@ export async function createFeatureFlag(
           ],
         });
         variationIds.push(variationId);
+
+        if (variation.id) {
+          variationIdMap.set(variation.id, variationId);
+        }
       }
 
       const conditionIds: string[] = [];
       for (const condition of data.conditions || []) {
         const conditionId = ID.unique();
+
+        const actualVariationId =
+          variationIdMap.get(condition.variationId) || condition.variationId;
+
         await database.createRow<Condition>({
           databaseId: DATABASE_ID,
           tableId: CONDITION_COLLECTION_ID,
@@ -66,7 +76,7 @@ export async function createFeatureFlag(
             contextAttribute: condition.contextAttribute,
             operator: condition.operator,
             values: condition.values,
-            variationId: condition.variationId,
+            variationId: actualVariationId,
           },
           permissions: [
             Permission.read(Role.team(data.teamId)),
@@ -294,6 +304,8 @@ export async function updateFeatureFlag(
       }
 
       const variationIds: string[] = [];
+      const variationIdMap: Map<string, string> = new Map();
+
       for (const variation of data.variations) {
         const variationId = ID.unique();
         await database.createRow<Variation>({
@@ -311,11 +323,19 @@ export async function updateFeatureFlag(
           ],
         });
         variationIds.push(variationId);
+
+        if (variation.id) {
+          variationIdMap.set(variation.id, variationId);
+        }
       }
 
       const conditionIds: string[] = [];
       for (const condition of data.conditions || []) {
         const conditionId = ID.unique();
+
+        const actualVariationId =
+          variationIdMap.get(condition.variationId) || condition.variationId;
+
         await database.createRow<Condition>({
           databaseId: DATABASE_ID,
           tableId: CONDITION_COLLECTION_ID,
@@ -324,7 +344,7 @@ export async function updateFeatureFlag(
             contextAttribute: condition.contextAttribute,
             operator: condition.operator,
             values: condition.values,
-            variationId: condition.variationId,
+            variationId: actualVariationId,
           },
           permissions: [
             Permission.read(Role.team(data.teamId)),

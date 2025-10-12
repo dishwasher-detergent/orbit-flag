@@ -25,6 +25,8 @@ import {
   CreateFeatureFlagFormData,
   createFeatureFlagSchema,
 } from "@/lib/feature-flag/schemas";
+import Link from "next/link";
+import { toast } from "sonner";
 
 export default function CreateFeatureFlagPage() {
   const router = useRouter();
@@ -73,20 +75,17 @@ export default function CreateFeatureFlagPage() {
 
   const onSubmit = (data: CreateFeatureFlagFormData) => {
     startTransition(async () => {
-      try {
-        const formData = {
-          ...data,
-        };
+      const formData = {
+        ...data,
+      };
 
-        const result = await createFeatureFlag(formData);
+      const result = await createFeatureFlag(formData);
 
-        if (result.success) {
-          // router.push(`/app/teams/${teamId}/flags`);
-        } else {
-          console.error("Failed to create feature flag:", result.message);
-        }
-      } catch (error) {
-        console.error("Error creating feature flag:", error);
+      if (result.success) {
+        toast.success(result.message);
+        router.push(`/app/teams/${teamId}/flags/${result.data?.$id}`);
+      } else {
+        toast.error(result.message);
       }
     });
   };
@@ -184,10 +183,10 @@ export default function CreateFeatureFlagPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.back()}
                 disabled={isPending}
+                asChild
               >
-                Cancel
+                <Link href={`/app/teams/${teamId}/flags`}>Cancel</Link>
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending ? (

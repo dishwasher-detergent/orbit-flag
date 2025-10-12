@@ -24,12 +24,9 @@ export default async function FlagsPage({
 
   return (
     <div className="space-y-6 p-4 max-w-6xl mx-auto w-full">
-      <div className="flex items-center justify-between">
+      <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <ToggleLeft className="size-6" />
-            Feature Flags
-          </h1>
+          <h1 className="text-2xl font-bold">Create Feature Flag</h1>
           <p className="text-muted-foreground">
             Manage feature flags and targeting rules for your application
           </p>
@@ -40,7 +37,7 @@ export default async function FlagsPage({
             Create Flag
           </Link>
         </Button>
-      </div>
+      </header>
       {success && featureFlags && featureFlags.length > 0 ? (
         <div className="border rounded-lg overflow-hidden">
           <Table>
@@ -64,7 +61,7 @@ export default async function FlagsPage({
                     <Button
                       asChild
                       variant="link"
-                      className="p-0 has-[>svg]:px-0 h-auto"
+                      className="p-0 has-[>svg]:px-0 h-auto text-foreground"
                     >
                       <Link href={`/app/teams/${teamId}/flags/${flag.$id}`}>
                         {flag.name}
