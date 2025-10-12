@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { FEATURE_FLAG_OPERATORS } from "@/constants/feature-flag.constants";
+import { createContext } from "@/lib/context";
 import { getFeatureFlagsByTeam } from "@/lib/feature-flag";
 import { getTeamById } from "@/lib/team";
 
-// Request schema for flag evaluation
 const evaluateRequestSchema = z.object({
   teamId: z.string().min(1, "Team ID is required"),
   flagKey: z.string().min(1, "Flag key is required"),
@@ -14,7 +14,6 @@ const evaluateRequestSchema = z.object({
 
 export type EvaluateRequestData = z.infer<typeof evaluateRequestSchema>;
 
-// Response schema
 interface EvaluateResponse {
   success: boolean;
   flagKey: string;
@@ -132,10 +131,13 @@ async function evaluateFlag(
     );
   }
 
-  // Check if flag is active
   if (flag.status !== "active") {
-    // Return default variation if flag is not active
     const defaultVariation = flag.variations?.find((v) => v.isDefault);
+
+    createContext(teamId, flagKey, context).catch((error) =>
+      console.error("Failed to save evaluation context:", error)
+    );
+
     return NextResponse.json({
       success: true,
       flagKey,
@@ -145,8 +147,11 @@ async function evaluateFlag(
     });
   }
 
-  // Evaluate conditions
   const matchingVariation = evaluateConditions(flag, context);
+
+  createContext(teamId, flagKey, context).catch((error) =>
+    console.error("Failed to save evaluation context:", error)
+  );
 
   return NextResponse.json({
     success: true,
@@ -209,7 +214,6 @@ function evaluateConditions(flag: any, context: Record<string, any>) {
   const variations = flag.variations || [];
   const conditions = flag.conditions || [];
 
-  // If no conditions, return default variation
   if (conditions.length === 0) {
     const defaultVariation = variations.find((v: any) => v.isDefault);
     return {
@@ -219,7 +223,6 @@ function evaluateConditions(flag: any, context: Record<string, any>) {
     };
   }
 
-  // Evaluate each condition
   for (const condition of conditions) {
     if (evaluateCondition(condition, context)) {
       const variation = variations.find(
@@ -235,7 +238,6 @@ function evaluateConditions(flag: any, context: Record<string, any>) {
     }
   }
 
-  // No conditions matched, return default variation
   const defaultVariation = variations.find((v: any) => v.isDefault);
   return {
     value: defaultVariation?.value || null,
@@ -254,7 +256,6 @@ function evaluateCondition(
   const { contextAttribute, operator, values } = condition;
   const contextValue = context[contextAttribute];
 
-  // If context attribute is not provided, condition fails
   if (contextValue === undefined || contextValue === null) {
     return false;
   }
