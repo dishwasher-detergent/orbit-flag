@@ -2,16 +2,12 @@ import { CreateFeatureFlagForm } from "@/components/feature-flag/create-feature-
 import { PageHeader } from "@/components/ui/page-header";
 import { Plus } from "lucide-react";
 
-interface CreateFeatureFlagPageProps {
-  params: {
-    teamId: string;
-  };
-}
-
 export default async function CreateFeatureFlagPage({
   params,
-}: CreateFeatureFlagPageProps) {
-  const { teamId } = params;
+}: {
+  params: Promise<{ teamId: string; flagId: string }>;
+}) {
+  const { teamId } = await params;
 
   return (
     <>

@@ -1,7 +1,15 @@
 "use server";
 
 import { revalidateTag, unstable_cache } from "next/cache";
-import { ID, Models, Permission, Query, Role } from "node-appwrite";
+import {
+  ID,
+  Models,
+  Permission,
+  Query,
+  Role,
+  TablesDB,
+  Teams,
+} from "node-appwrite";
 
 import {
   ADMIN_ROLE,
@@ -20,11 +28,9 @@ import {
   USER_COLLECTION_ID,
 } from "@/lib/constants";
 import { createAdminClient, createSessionClient } from "@/lib/server/appwrite";
-import {
-  AddTeamFormData,
-  EditTeamFormData,
-  WhitelistFormData,
-} from "./schemas";
+import { AddTeamFormData, EditTeamFormData } from "./schemas";
+
+//#region Auth Required Functions
 
 /**
  * Get a team by ID
@@ -37,62 +43,7 @@ export async function getTeamById(id: string): Promise<Result<TeamData>> {
 
     return unstable_cache(
       async (id) => {
-        try {
-          const data = await database.getRow<TeamData>({
-            databaseId: DATABASE_ID,
-            tableId: TEAM_COLLECTION_ID,
-            rowId: id,
-          });
-
-          const memberships = await team.listMemberships({ teamId: data.$id });
-
-          const userIds = memberships.memberships.map(
-            (member) => member.userId
-          );
-          const uniqueUserIds = Array.from(new Set(userIds));
-
-          const users = await database.listRows<UserData>({
-            databaseId: DATABASE_ID,
-            tableId: USER_COLLECTION_ID,
-            queries: [
-              Query.equal("$id", uniqueUserIds),
-              Query.select(["$id", "name"]),
-            ],
-          });
-
-          const usersMembershipData: UserMemberData[] = users.rows.map(
-            (user) => {
-              const member = memberships.memberships.filter(
-                (member) => member.userId === user.$id
-              )[0];
-              return {
-                ...user,
-                roles: member.roles,
-                confirmed: member.confirm,
-                joinedAt: member.joined,
-              };
-            }
-          );
-
-          return {
-            success: true,
-            message: "Team successfully retrieved.",
-            data: {
-              ...data,
-              members: usersMembershipData,
-            },
-          };
-        } catch (err) {
-          const error = err as Error;
-
-          // This is where you would look to something like Splunk.
-          console.error(error);
-
-          return {
-            success: false,
-            message: error.message,
-          };
-        }
+        return getTeamByIdCore(database, team, id);
       },
       ["team", `team:${id}`, id],
       {
@@ -114,28 +65,7 @@ export async function listTeams(): Promise<Result<TeamData[]>> {
     return unstable_cache(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       async (userId) => {
-        try {
-          const data = await database.listRows<TeamData>({
-            databaseId: DATABASE_ID,
-            tableId: TEAM_COLLECTION_ID,
-          });
-
-          return {
-            success: true,
-            message: "Teams successfully retrieved.",
-            data: data.rows,
-          };
-        } catch (err) {
-          const error = err as Error;
-
-          // This is where you would look to something like Splunk.
-          console.error(error);
-
-          return {
-            success: false,
-            message: error.message,
-          };
-        }
+        return listTeamsCore(database);
       },
       ["teams", `teams:user-${user.$id}`],
       {
@@ -722,3 +652,122 @@ export async function updateTeamWhitelist(
     }
   });
 }
+
+//#endregion
+
+//#region Admin Functions
+
+/**
+ * Get team by ID (Admin)
+ * @param {string} id The team ID
+ * @returns {Promise<Result<TeamData>>} The team
+ */
+export async function getTeamByIdAdmin(id: string): Promise<Result<TeamData>> {
+  const { table: database, team } = await createAdminClient();
+  return getTeamByIdCore(database, team, id);
+}
+
+/**
+ * List all teams (Admin)
+ * @returns {Promise<Result<TeamData[]>>} The teams
+ */
+export async function listTeamsAdmin(): Promise<Result<TeamData[]>> {
+  const { table: database } = await createAdminClient();
+  return listTeamsCore(database);
+}
+
+//#endregion
+
+//#region Core Functions
+
+/**
+ * Core function to get team by ID with any database client
+ * @param {TablesDB} database The database client (admin or session)
+ * @param {Teams} teamClient The team client (admin or session)
+ * @param {string} id The team ID
+ * @returns {Promise<Result<TeamData>>} The team
+ */
+async function getTeamByIdCore(
+  database: TablesDB,
+  teamClient: Teams,
+  id: string
+): Promise<Result<TeamData>> {
+  try {
+    const data = await database.getRow<TeamData>({
+      databaseId: DATABASE_ID,
+      tableId: TEAM_COLLECTION_ID,
+      rowId: id,
+    });
+
+    const memberships = await teamClient.listMemberships({ teamId: data.$id });
+
+    const userIds = memberships.memberships.map((member) => member.userId);
+    const uniqueUserIds = Array.from(new Set(userIds));
+
+    const users = await database.listRows<UserData>({
+      databaseId: DATABASE_ID,
+      tableId: USER_COLLECTION_ID,
+      queries: [
+        Query.equal("$id", uniqueUserIds),
+        Query.select(["$id", "name"]),
+      ],
+    });
+
+    const usersMembershipData: UserMemberData[] = users.rows.map((user) => {
+      const member = memberships.memberships.filter(
+        (member) => member.userId === user.$id
+      )[0];
+      return {
+        ...user,
+        roles: member.roles,
+        confirmed: member.confirm,
+        joinedAt: member.joined,
+      };
+    });
+
+    return {
+      success: true,
+      message: "Team successfully retrieved.",
+      data: {
+        ...data,
+        members: usersMembershipData,
+      },
+    };
+  } catch (err) {
+    const error = err as Error;
+    console.error("Error getting team:", error);
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+}
+
+/**
+ * Core function to list teams with any database client
+ * @param {TablesDB} database The database client (admin or session)
+ * @returns {Promise<Result<TeamData[]>>} The teams
+ */
+async function listTeamsCore(database: TablesDB): Promise<Result<TeamData[]>> {
+  try {
+    const data = await database.listRows<TeamData>({
+      databaseId: DATABASE_ID,
+      tableId: TEAM_COLLECTION_ID,
+    });
+
+    return {
+      success: true,
+      message: "Teams successfully retrieved.",
+      data: data.rows,
+    };
+  } catch (err) {
+    const error = err as Error;
+    console.error("Error listing teams:", error);
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+}
+
+//#endregion

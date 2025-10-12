@@ -5,17 +5,12 @@ import { PageHeader } from "@/components/ui/page-header";
 import { getFeatureFlagById } from "@/lib/feature-flag";
 import { Pencil } from "lucide-react";
 
-interface EditFeatureFlagPageProps {
-  params: {
-    teamId: string;
-    flagId: string;
-  };
-}
-
 export default async function EditFeatureFlagPage({
   params,
-}: EditFeatureFlagPageProps) {
-  const { teamId, flagId } = params;
+}: {
+  params: Promise<{ teamId: string; flagId: string }>;
+}) {
+  const { teamId, flagId } = await params;
 
   const result = await getFeatureFlagById(flagId);
 
