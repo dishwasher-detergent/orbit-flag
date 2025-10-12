@@ -5,14 +5,12 @@ import { WhitelistForm } from "@/components/team/whitelist-form";
 import { PageHeader } from "@/components/ui/page-header";
 import { getTeamById } from "@/lib/team";
 
-interface WhitelistPageProps {
-  params: {
-    teamId: string;
-  };
-}
-
-export default async function WhitelistPage({ params }: WhitelistPageProps) {
-  const { teamId } = params;
+export default async function WhitelistPage({
+  params,
+}: {
+  params: Promise<{ teamId: string; flagId: string }>;
+}) {
+  const { teamId } = await params;
 
   const result = await getTeamById(teamId);
 

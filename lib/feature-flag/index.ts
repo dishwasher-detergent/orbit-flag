@@ -345,30 +345,44 @@ async function getFeatureFlagByIdCore(
       rowId: flagId,
     });
 
-    // Get variations
-    const variations = await database.listRows<Variation>({
-      databaseId: DATABASE_ID,
-      tableId: VARIATION_COLLECTION_ID,
-      queries: [Query.equal("flagId", flag.$id)],
-    });
+    const variations = await Promise.all(
+      (flag.variationIds || []).map(async (variationId: string) => {
+        try {
+          return await database.getRow<Variation>({
+            databaseId: DATABASE_ID,
+            tableId: VARIATION_COLLECTION_ID,
+            rowId: variationId,
+          });
+        } catch {
+          return null;
+        }
+      })
+    );
 
-    flag.variations = variations.rows;
+    const conditions = await Promise.all(
+      (flag.conditionIds || []).map(async (conditionId: string) => {
+        try {
+          return await database.getRow<Condition>({
+            databaseId: DATABASE_ID,
+            tableId: CONDITION_COLLECTION_ID,
+            rowId: conditionId,
+          });
+        } catch {
+          return null;
+        }
+      })
+    );
 
-    // Get conditions for each variation
-    for (const variation of flag.variations) {
-      const conditions = await database.listRows<Condition>({
-        databaseId: DATABASE_ID,
-        tableId: CONDITION_COLLECTION_ID,
-        queries: [Query.equal("variationId", variation.$id)],
-      });
-
-      (variation as any).conditions = conditions.rows;
-    }
+    const enrichedFlag: FeatureFlag = {
+      ...flag,
+      variations: variations.filter((x) => x !== null),
+      conditions: conditions.filter((x) => x !== null),
+    };
 
     return {
       success: true,
       message: "Feature flag retrieved successfully",
-      data: flag,
+      data: enrichedFlag,
     };
   } catch (error) {
     console.error("Error getting feature flag:", error);
