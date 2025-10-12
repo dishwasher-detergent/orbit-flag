@@ -35,7 +35,7 @@ export default async function SettingsPage({
   }
 
   return (
-    <main className="space-y-6 p-4 max-w-6xl mx-auto w-full">
+    <>
       <TeamDescription team={data} />
       {isMember && (
         <TeamActions data={data} isOwner={isOwner} isAdmin={isAdmin} />
@@ -46,6 +46,6 @@ export default async function SettingsPage({
         isOwner={isOwner}
         isAdmin={isAdmin}
       />
-    </main>
+    </>
   );
 }

@@ -111,139 +111,127 @@ export function EditFeatureFlagForm({
   const watchedVariations = form.watch("variations");
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold">Edit Feature Flag</h1>
-        <p>Update your feature flag with targeting rules</p>
-      </header>
-      <div>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <section>
-              <h2 className="font-semibold text-base mb-2">Details</h2>
-              <div className="flex flex-col gap-4 border rounded-lg bg-sidebar p-2 pt-3">
-                <div className="flex flex-row gap-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Flag Name"
-                            className="bg-background"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="key"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel>Key</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="flag_name"
-                            className="bg-background"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="Describe what this feature flag controls..."
-                          rows={3}
-                          className="bg-background"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </section>
-            <FeatureFlagVariations control={form.control} />
-            {watchedVariations && watchedVariations.length > 0 && (
-              <FeatureFlagConditions control={form.control} />
-            )}
-            <div className="flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                disabled={isPending}
-                asChild
-              >
-                <Link href={`/app/teams/${teamId}/flags`}>Cancel</Link>
-              </Button>
-              <DeleteFeatureFlag flag={flag} teamId={teamId} />
-              <Button
-                type="button"
-                variant={currentStatus === "active" ? "destructive" : "outline"}
-                disabled={isPending || isToggling}
-                onClick={handleToggleStatus}
-                size="sm"
-              >
-                {isToggling ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    {currentStatus === "active"
-                      ? "Deactivating..."
-                      : "Activating..."}
-                  </>
-                ) : (
-                  <>
-                    {currentStatus === "active" ? (
-                      <>
-                        <Pause className="size-4" />
-                        Deactivate
-                      </>
-                    ) : (
-                      <>
-                        <Play className="size-4" />
-                        Activate
-                      </>
-                    )}
-                  </>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <section>
+          <h2 className="font-semibold text-base mb-2">Details</h2>
+          <div className="flex flex-col gap-4 border rounded-lg bg-sidebar p-1 pt-2">
+            <div className="flex flex-row gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Flag Name"
+                        className="bg-background"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </Button>
-              <Button
-                type="submit"
-                disabled={isPending || isToggling}
-                size="sm"
-              >
-                {isPending ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  <>
-                    <Save className="size-4" />
-                    Update Feature Flag
-                  </>
+              />
+              <FormField
+                control={form.control}
+                name="key"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Key</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="flag_name"
+                        className="bg-background"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </Button>
+              />
             </div>
-          </form>
-        </Form>
-      </div>
-    </div>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Describe what this feature flag controls..."
+                      rows={3}
+                      className="bg-background"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </section>
+        <FeatureFlagVariations control={form.control} />
+        {watchedVariations && watchedVariations.length > 0 && (
+          <FeatureFlagConditions control={form.control} />
+        )}
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={isPending}
+            asChild
+          >
+            <Link href={`/app/teams/${teamId}/flags`}>Cancel</Link>
+          </Button>
+          <DeleteFeatureFlag flag={flag} teamId={teamId} />
+          <Button
+            type="button"
+            variant={currentStatus === "active" ? "destructive" : "outline"}
+            disabled={isPending || isToggling}
+            onClick={handleToggleStatus}
+            size="sm"
+          >
+            {isToggling ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                {currentStatus === "active"
+                  ? "Deactivating..."
+                  : "Activating..."}
+              </>
+            ) : (
+              <>
+                {currentStatus === "active" ? (
+                  <>
+                    <Pause className="size-4" />
+                    Deactivate
+                  </>
+                ) : (
+                  <>
+                    <Play className="size-4" />
+                    Activate
+                  </>
+                )}
+              </>
+            )}
+          </Button>
+          <Button type="submit" disabled={isPending || isToggling} size="sm">
+            {isPending ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Updating...
+              </>
+            ) : (
+              <>
+                <Save className="size-4" />
+                Update Feature Flag
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

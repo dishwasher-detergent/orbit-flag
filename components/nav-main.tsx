@@ -2,6 +2,7 @@
 
 import {
   LucideFingerprint,
+  LucideShield,
   LucideThumbsUp,
   LucideToggleLeft,
 } from "lucide-react";
@@ -53,6 +54,14 @@ export function NavMain() {
               <Link href={`/app/teams/${teamId}/contexts`}>
                 <LucideFingerprint />
                 <span>Contexts</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem key="whitelist">
+            <SidebarMenuButton asChild tooltip="Whitelist">
+              <Link href={`/app/teams/${teamId}/whitelist`}>
+                <LucideShield />
+                <span>Whitelist</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

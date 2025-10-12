@@ -20,7 +20,11 @@ import {
   USER_COLLECTION_ID,
 } from "@/lib/constants";
 import { createAdminClient, createSessionClient } from "@/lib/server/appwrite";
-import { AddTeamFormData, EditTeamFormData } from "./schemas";
+import {
+  AddTeamFormData,
+  EditTeamFormData,
+  WhitelistFormData,
+} from "./schemas";
 
 /**
  * Get a team by ID
@@ -671,4 +675,50 @@ export async function checkUserRole(
   }
 
   return userMembership;
+}
+
+/**
+ * Update team whitelist
+ * @param {string} id The team ID
+ * @param {WhitelistFormData} data The whitelist data
+ * @returns {Promise<Result<TeamData>>} The updated team
+ */
+export async function updateTeamWhitelist(
+  id: string,
+  data: { domains: string[] }
+): Promise<Result<TeamData>> {
+  return withAuth(async (user) => {
+    const { table: database } = await createSessionClient();
+
+    try {
+      await checkUserRole(id, user.$id, [ADMIN_ROLE, OWNER_ROLE]);
+
+      const whitelist = data.domains.map((domain) => new URL(domain));
+
+      const teamData = await database.updateRow<TeamData>({
+        databaseId: DATABASE_ID,
+        tableId: TEAM_COLLECTION_ID,
+        rowId: id,
+        data: {
+          whitelist,
+        },
+      });
+
+      revalidateTag(`teams:user-${user.$id}`);
+      revalidateTag(`team:${id}`);
+
+      return {
+        success: true,
+        message: "Team whitelist successfully updated.",
+        data: teamData,
+      };
+    } catch (err) {
+      const error = err as Error;
+      console.error(error);
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
+  });
 }

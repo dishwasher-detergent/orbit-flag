@@ -106,114 +106,107 @@ export function CreateFeatureFlagForm({ teamId }: CreateFeatureFlagFormProps) {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold">Create Feature Flag</h1>
-        <p>Set up a new feature flag with targeting rules</p>
-      </header>
-      <div>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <section>
-              <h2 className="font-semibold text-base mb-2">Details</h2>
-              <div className="flex flex-col gap-4 border rounded-lg bg-sidebar p-1 pt-2">
-                <div className="flex flex-row gap-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Flag Name"
-                            className="bg-background"
-                            onChange={(e) => {
-                              field.onChange(e);
-                              handleNameChange(e.target.value);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="key"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel>Key</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="flag_name"
-                            className="bg-background"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="Describe what this feature flag controls..."
-                          rows={3}
-                          className="bg-background"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </section>
-            <FeatureFlagVariations control={form.control} />
-            {watchedVariations && watchedVariations.length > 0 ? (
-              <FeatureFlagConditions control={form.control} />
-            ) : (
-              <section>
-                <h2 className="font-semibold text-base">Conditions</h2>
-                <p className="text-sm">
-                  Conditions can only be applied when variations are present.
-                </p>
-              </section>
-            )}
-            <div className="flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isPending}
-                asChild
-              >
-                <Link href={`/app/teams/${teamId}/flags`}>Cancel</Link>
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <Save className="size-4" />
-                    Create Feature Flag
-                  </>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <section>
+          <h2 className="font-semibold text-base mb-2">Details</h2>
+          <div className="flex flex-col gap-4 border rounded-lg bg-sidebar p-1 pt-2">
+            <div className="flex flex-row gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Flag Name"
+                        className="bg-background"
+                        onChange={(e) => {
+                          field.onChange(e);
+                          handleNameChange(e.target.value);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </Button>
+              />
+              <FormField
+                control={form.control}
+                name="key"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Key</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="flag_name"
+                        className="bg-background"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-          </form>
-        </Form>
-      </div>
-    </div>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Describe what this feature flag controls..."
+                      rows={3}
+                      className="bg-background"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </section>
+        <FeatureFlagVariations control={form.control} />
+        {watchedVariations && watchedVariations.length > 0 ? (
+          <FeatureFlagConditions control={form.control} />
+        ) : (
+          <section>
+            <h2 className="font-semibold text-base">Conditions</h2>
+            <p className="text-sm">
+              Conditions can only be applied when variations are present.
+            </p>
+          </section>
+        )}
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={isPending}
+            asChild
+          >
+            <Link href={`/app/teams/${teamId}/flags`}>Cancel</Link>
+          </Button>
+          <Button type="submit" disabled={isPending} size="sm">
+            {isPending ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <Save className="size-4" />
+                Create Feature Flag
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

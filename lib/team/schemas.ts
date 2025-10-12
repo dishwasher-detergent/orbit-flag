@@ -45,3 +45,22 @@ export const leaveTeamSchema = z.object({
 });
 
 export type LeaveTeamFormData = z.infer<typeof leaveTeamSchema>;
+
+export const whitelistSchema = z.object({
+  domains: z.array(
+    z
+      .string()
+      .min(1, "Domain is required")
+      .url("Must be a valid URL")
+      .refine((url) => {
+        try {
+          const parsed = new URL(url);
+          return parsed.protocol === "http:" || parsed.protocol === "https:";
+        } catch {
+          return false;
+        }
+      }, "Must be a valid HTTP or HTTPS URL")
+  ),
+});
+
+export type WhitelistFormData = z.infer<typeof whitelistSchema>;

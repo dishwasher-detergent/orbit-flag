@@ -101,17 +101,27 @@
                     "array": false,
                     "size": 256,
                     "default": null
+                },
+                {
+                    "key": "whitelist",
+                    "type": "string",
+                    "required": false,
+                    "array": true,
+                    "format": "url",
+                    "default": null
                 }
             ],
             "indexes": []
         },
         {
             "$id": "variation",
-            "$permissions": [],
+            "$permissions": [
+                "create(\"users\")"
+            ],
             "databaseId": "orbit-flag",
             "name": "variation",
             "enabled": true,
-            "documentSecurity": false,
+            "documentSecurity": true,
             "attributes": [
                 {
                     "key": "name",
@@ -145,11 +155,13 @@
         },
         {
             "$id": "condition",
-            "$permissions": [],
+            "$permissions": [
+                "create(\"users\")"
+            ],
             "databaseId": "orbit-flag",
             "name": "condition",
             "enabled": true,
-            "documentSecurity": false,
+            "documentSecurity": true,
             "attributes": [
                 {
                     "key": "contextAttribute",
@@ -202,11 +214,13 @@
         },
         {
             "$id": "flag",
-            "$permissions": [],
+            "$permissions": [
+                "create(\"users\")"
+            ],
             "databaseId": "orbit-flag",
             "name": "flag",
             "enabled": true,
-            "documentSecurity": false,
+            "documentSecurity": true,
             "attributes": [
                 {
                     "key": "name",
@@ -266,6 +280,35 @@
                     "type": "string",
                     "required": false,
                     "array": true,
+                    "size": 32,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "context",
+            "$permissions": [
+                "create(\"users\")"
+            ],
+            "databaseId": "orbit-flag",
+            "name": "context",
+            "enabled": true,
+            "documentSecurity": true,
+            "attributes": [
+                {
+                    "key": "context",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 1024,
+                    "default": null
+                },
+                {
+                    "key": "teamId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
                     "size": 32,
                     "default": null
                 }

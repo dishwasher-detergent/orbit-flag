@@ -7,6 +7,7 @@ export interface TeamData extends Models.Row {
   name: string;
   members?: UserMemberData[];
   description?: string;
+  whitelist?: URL[];
 }
 
 export interface Team extends Models.Team<Models.Preferences>, TeamData {}

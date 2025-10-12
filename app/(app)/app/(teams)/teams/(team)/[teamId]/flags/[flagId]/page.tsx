@@ -1,7 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 
 import { EditFeatureFlagForm } from "@/components/feature-flag/edit-feature-flag-form";
+import { PageHeader } from "@/components/ui/page-header";
 import { getFeatureFlagById } from "@/lib/feature-flag";
+import { Pencil } from "lucide-react";
 
 interface EditFeatureFlagPageProps {
   params: {
@@ -27,5 +29,14 @@ export default async function EditFeatureFlagPage({
     redirect(`/app/teams/${flag.teamId}/flags/${flagId}`);
   }
 
-  return <EditFeatureFlagForm flag={flag} teamId={teamId} />;
+  return (
+    <>
+      <PageHeader
+        title="Edit Feature Flag"
+        description="Modify the settings for this feature flag."
+        icon={Pencil}
+      />
+      <EditFeatureFlagForm flag={flag} teamId={teamId} />;
+    </>
+  );
 }
