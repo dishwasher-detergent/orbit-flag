@@ -30,7 +30,11 @@ export function useUserData() {
   };
 
   useEffect(() => {
-    fetchUser();
+    const timer = setTimeout(() => {
+      fetchUser();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return {
