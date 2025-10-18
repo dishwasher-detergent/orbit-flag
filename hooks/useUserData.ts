@@ -7,7 +7,7 @@ import { User } from "@/interfaces/user.interface";
 import { getUserData } from "@/lib/auth";
 import { getCurrentUserRoles } from "@/lib/team";
 
-export function useUserData(teamId: string) {
+export function useUserData(teamId?: string) {
   const [loading, setLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [roles, setRoles] = useState<string[]>([]);
@@ -16,22 +16,25 @@ export function useUserData(teamId: string) {
     setLoading(true);
 
     const data = await getUserData();
-    const roles = await getCurrentUserRoles(teamId);
+
+    if (teamId) {
+      const roles = await getCurrentUserRoles(teamId);
+
+      if (!roles.success) {
+        toast.error(roles.message);
+      }
+
+      if (roles?.data) {
+        setRoles(roles.data);
+      }
+    }
 
     if (!data.success) {
       toast.error(data.message);
     }
 
-    if (!roles.success) {
-      toast.error(roles.message);
-    }
-
     if (data?.data) {
       setUser(data.data);
-    }
-
-    if (roles?.data) {
-      setRoles(roles.data);
     }
 
     setLoading(false);
