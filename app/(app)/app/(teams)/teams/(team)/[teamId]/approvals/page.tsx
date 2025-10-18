@@ -1,8 +1,10 @@
 import { LucideThumbsUp } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Query } from "node-appwrite";
 
 import { ApprovalActions } from "@/components/feature-flag/approval-actions";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import {
@@ -17,7 +19,6 @@ import { ADMIN_ROLE } from "@/constants/team.constants";
 import { FeatureFlag } from "@/interfaces/feature-flag.interface";
 import { getFeatureFlagsByTeam } from "@/lib/feature-flag";
 import { getCurrentUserRoles } from "@/lib/team";
-import { redirect } from "next/navigation";
 
 export default async function ApprovalsPage({
   params,
@@ -51,6 +52,7 @@ export default async function ApprovalsPage({
                 <TableRow>
                   <TableHead className="w-full">Name</TableHead>
                   <TableHead>Key</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -81,6 +83,9 @@ export default async function ApprovalsPage({
                       <code className="text-sm bg-muted px-1.5 py-0.5 rounded">
                         {flag.key}
                       </code>
+                    </TableCell>
+                    <TableCell className="align-top">
+                      <Badge variant={flag.status}>{flag.status}</Badge>
                     </TableCell>
                     <TableCell className="align-top">
                       <span className="text-sm text-muted-foreground">

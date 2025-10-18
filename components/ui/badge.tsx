@@ -23,6 +23,7 @@ const badgeVariants = cva(
         approved: "bg-blue-600/80 text-white border-1 border-blue-600",
         rejected: "bg-rose-600/80 text-white border-1 border-rose-600",
         pending: "bg-amber-600/80 text-white border-1 border-amber-600",
+        new: "bg-slate-600/80 text-white border-1 border-slate-600",
       },
     },
     defaultVariants: {
