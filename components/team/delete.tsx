@@ -40,7 +40,8 @@ export function DeleteTeam({ team }: { team: TeamData }) {
           onClick={() => {
             setOpen(!open);
           }}
-          variant="secondary"
+          variant="ghost"
+          className="justify-between"
         >
           Delete Team
           <LucideTrash2 className="size-3.5" />

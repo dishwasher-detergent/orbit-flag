@@ -1,7 +1,7 @@
 import { Shield } from "lucide-react";
 import { notFound } from "next/navigation";
 
-import { WhitelistForm } from "@/components/team/whitelist-form";
+import { WhitelistForm } from "@/components/feature-flag/whitelist-form";
 import { PageHeader } from "@/components/ui/page-header";
 import { getTeamById } from "@/lib/team";
 

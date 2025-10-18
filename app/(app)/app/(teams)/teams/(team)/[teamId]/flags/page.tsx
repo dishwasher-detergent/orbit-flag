@@ -41,7 +41,7 @@ export default async function FlagsPage({
       </PageHeader>
       {success && featureFlags && featureFlags.length > 0 ? (
         <section className="border rounded-lg overflow-hidden p-1 bg-sidebar">
-          <div className="border rounded-lg bg-background">
+          <div className="border border-input rounded-lg bg-background">
             <Table>
               <TableHeader>
                 <TableRow>

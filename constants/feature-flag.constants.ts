@@ -12,6 +12,7 @@ export enum FEATURE_FLAG_STATUS {
   ACTIVE = "active",
   INACTIVE = "inactive",
   ARCHIVED = "archived",
+  PENDING_APPROVAL = "pending_approval",
 }
 
 export enum FEATURE_FLAG_VALUES {

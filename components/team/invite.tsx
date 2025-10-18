@@ -36,7 +36,8 @@ export function InviteTeam({ team }: { team: TeamData }) {
           onClick={() => {
             setOpen(!open);
           }}
-          variant="secondary"
+          variant="ghost"
+          className="justify-between"
         >
           Add Member
           <LucideUserRoundPlus className="size-3.5" />

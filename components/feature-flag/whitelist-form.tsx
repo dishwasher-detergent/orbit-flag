@@ -26,10 +26,7 @@ export function WhitelistForm({ team }: WhitelistFormProps) {
 
   const onSubmit = () => {
     startTransition(async () => {
-      // Filter out empty domains and validate URLs
       const filteredDomains = domains.filter((domain) => domain.trim() !== "");
-
-      // Basic URL validation
       const invalidDomains = filteredDomains.filter((domain) => {
         try {
           new URL(domain);
@@ -79,7 +76,7 @@ export function WhitelistForm({ team }: WhitelistFormProps) {
         </div>
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           onClick={addDomain}
           disabled={isPending}
         >

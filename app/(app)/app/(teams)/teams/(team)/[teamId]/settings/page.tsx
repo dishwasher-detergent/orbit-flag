@@ -1,8 +1,9 @@
+import { LucideSettings } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import { TeamActions } from "@/components/team/actions";
-import { TeamDescription } from "@/components/team/description";
 import { TeamMembers } from "@/components/team/members";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   ADMIN_ROLE,
   MEMBER_ROLE,
@@ -36,10 +37,15 @@ export default async function SettingsPage({
 
   return (
     <>
-      <TeamDescription team={data} />
-      {isMember && (
-        <TeamActions data={data} isOwner={isOwner} isAdmin={isAdmin} />
-      )}
+      <PageHeader
+        icon={LucideSettings}
+        title={data.name}
+        description={data.description || "Team Settings"}
+      >
+        {isMember && (
+          <TeamActions data={data} isOwner={isOwner} isAdmin={isAdmin} />
+        )}
+      </PageHeader>
       <TeamMembers
         members={data.members ?? []}
         teamId={data.$id}

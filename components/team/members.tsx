@@ -40,51 +40,53 @@ export function TeamMembers({
   return (
     <section>
       <h3 className="font-semibold text-base mb-2">Members</h3>
-      <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-full">User</TableHead>
-              <TableHead>Role(s)</TableHead>
-              <TableHead>Joined</TableHead>
-              {isAdmin && <TableHead>Actions</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {members?.map((member) => (
-              <TableRow key={member.$id}>
-                <TableCell className="flex flex-row gap-2 items-center">
-                  <div className="flex flex-row gap-2 items-center">
-                    {member.roles.includes(ADMIN_ROLE) && (
-                      <LucideCrown className="size-3.5 text-amber-600" />
-                    )}
-                    {!member.confirmed && (
-                      <LucideMailWarning className="size-3.5" />
-                    )}
-                  </div>
-                  {member.name}
-                </TableCell>
-                <TableCell>{member.roles.join(", ")}</TableCell>
-                <TableCell>
-                  {member.joinedAt
-                    ? new Date(member.joinedAt).toLocaleDateString()
-                    : "N/A"}
-                </TableCell>
-                {isAdmin && (
-                  <TableCell>
-                    {!member.roles.includes(OWNER_ROLE) && (
-                      <MemberActions
-                        member={member}
-                        teamId={teamId}
-                        isOwner={isOwner}
-                      />
-                    )}
-                  </TableCell>
-                )}
+      <div className="border rounded-lg overflow-hidden p-1 bg-sidebar">
+        <div className="border border-input rounded-lg bg-background">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-full">User</TableHead>
+                <TableHead>Role(s)</TableHead>
+                <TableHead>Joined</TableHead>
+                {isAdmin && <TableHead>Actions</TableHead>}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {members?.map((member) => (
+                <TableRow key={member.$id}>
+                  <TableCell className="flex flex-row gap-2 items-center">
+                    <div className="flex flex-row gap-2 items-center">
+                      {member.roles.includes(ADMIN_ROLE) && (
+                        <LucideCrown className="size-3.5 text-amber-600" />
+                      )}
+                      {!member.confirmed && (
+                        <LucideMailWarning className="size-3.5" />
+                      )}
+                    </div>
+                    {member.name}
+                  </TableCell>
+                  <TableCell>{member.roles.join(", ")}</TableCell>
+                  <TableCell>
+                    {member.joinedAt
+                      ? new Date(member.joinedAt).toLocaleDateString()
+                      : "N/A"}
+                  </TableCell>
+                  {isAdmin && (
+                    <TableCell>
+                      {!member.roles.includes(OWNER_ROLE) && (
+                        <MemberActions
+                          member={member}
+                          teamId={teamId}
+                          isOwner={isOwner}
+                        />
+                      )}
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </section>
   );

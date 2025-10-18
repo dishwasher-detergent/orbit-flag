@@ -43,7 +43,8 @@ export function EditTeam({ team }: { team: TeamData }) {
           onClick={() => {
             setOpen(!open);
           }}
-          variant="secondary"
+          variant="ghost"
+          className="justify-between"
         >
           Edit Team
           <LucidePencil className="size-3.5" />
