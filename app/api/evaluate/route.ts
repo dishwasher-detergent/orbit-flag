@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { FEATURE_FLAG_OPERATORS } from "@/constants/feature-flag.constants";
+import {
+  FEATURE_FLAG_APPROVAL,
+  FEATURE_FLAG_OPERATORS,
+  FEATURE_FLAG_STATUS,
+} from "@/constants/feature-flag.constants";
 import { createContextAdmin } from "@/lib/context";
 import { getFeatureFlagsByTeamAdmin } from "@/lib/feature-flag";
 import { getTeamByIdAdmin } from "@/lib/team";
@@ -133,7 +137,10 @@ async function evaluateFlag(
     );
   }
 
-  if (flag.status !== "active") {
+  if (
+    flag.status !== FEATURE_FLAG_STATUS.ACTIVE ||
+    flag.approval !== FEATURE_FLAG_APPROVAL.APPROVED
+  ) {
     const defaultVariation = flag.variations?.find((v) => v.isDefault);
 
     createContextAdmin(teamId, flagKey, context).then(
