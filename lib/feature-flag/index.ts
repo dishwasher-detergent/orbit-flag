@@ -49,6 +49,10 @@ export async function createFeatureFlag(
     ];
 
     try {
+      const transaction = await database.createTransaction({
+        ttl: 60,
+      });
+
       const variationIds: string[] = [];
       const variationIdMap: Map<string, string> = new Map();
 
@@ -64,6 +68,7 @@ export async function createFeatureFlag(
             isDefault: variation.isDefault,
           },
           permissions,
+          transactionId: transaction.$id,
         });
         variationIds.push(variationId);
 
@@ -90,6 +95,7 @@ export async function createFeatureFlag(
             variationId: actualVariationId,
           },
           permissions,
+          transactionId: transaction.$id,
         });
         conditionIds.push(conditionId);
       }
@@ -110,6 +116,12 @@ export async function createFeatureFlag(
           conditionIds,
         },
         permissions,
+        transactionId: transaction.$id,
+      });
+
+      await database.updateTransaction({
+        transactionId: transaction.$id,
+        commit: true,
       });
 
       revalidateTag(`feature-flags:${data.teamId}`);
@@ -121,6 +133,7 @@ export async function createFeatureFlag(
       };
     } catch (error) {
       console.error("Error creating feature flag:", error);
+
       return {
         success: false,
         message: "Failed to create feature flag",
@@ -247,19 +260,23 @@ export async function updateFeatureFlag(
     ];
 
     try {
+      const transaction = await database.createTransaction({
+        ttl: 60,
+      });
+
       const existingFlag = await database.getRow<FeatureFlag>({
         databaseId: DATABASE_ID,
         tableId: FLAG_COLLECTION_ID,
         rowId: data.id,
       });
 
-      // Delete existing variations
       for (const variationId of existingFlag.variationIds || []) {
         try {
           await database.deleteRow({
             databaseId: DATABASE_ID,
             tableId: VARIATION_COLLECTION_ID,
             rowId: variationId,
+            transactionId: transaction.$id,
           });
         } catch {
           console.error("Variation might already be deleted");
@@ -272,6 +289,7 @@ export async function updateFeatureFlag(
             databaseId: DATABASE_ID,
             tableId: CONDITION_COLLECTION_ID,
             rowId: conditionId,
+            transactionId: transaction.$id,
           });
         } catch {
           console.error("Condition might already be deleted");
@@ -293,6 +311,7 @@ export async function updateFeatureFlag(
             isDefault: variation.isDefault,
           },
           permissions,
+          transactionId: transaction.$id,
         });
         variationIds.push(variationId);
 
@@ -319,6 +338,7 @@ export async function updateFeatureFlag(
             variationId: actualVariationId,
           },
           permissions,
+          transactionId: transaction.$id,
         });
         conditionIds.push(conditionId);
       }
@@ -335,6 +355,12 @@ export async function updateFeatureFlag(
           variationIds,
           conditionIds,
         },
+        transactionId: transaction.$id,
+      });
+
+      await database.updateTransaction({
+        transactionId: transaction.$id,
+        commit: true,
       });
 
       revalidateTag(`feature-flags:${data.teamId}`);
@@ -347,6 +373,7 @@ export async function updateFeatureFlag(
       };
     } catch (error) {
       console.error("Error updating feature flag:", error);
+
       return {
         success: false,
         message: "Failed to update feature flag",
@@ -367,6 +394,10 @@ export async function deleteFeatureFlag(
     const { table: database } = await createSessionClient();
 
     try {
+      const transaction = await database.createTransaction({
+        ttl: 60,
+      });
+
       const flag = await database.getRow({
         databaseId: DATABASE_ID,
         tableId: FLAG_COLLECTION_ID,
@@ -379,6 +410,7 @@ export async function deleteFeatureFlag(
             databaseId: DATABASE_ID,
             tableId: VARIATION_COLLECTION_ID,
             rowId: variationId,
+            transactionId: transaction.$id,
           });
         } catch {
           console.error("Variation might already be deleted");
@@ -391,6 +423,7 @@ export async function deleteFeatureFlag(
             databaseId: DATABASE_ID,
             tableId: CONDITION_COLLECTION_ID,
             rowId: conditionId,
+            transactionId: transaction.$id,
           });
         } catch {
           console.error("Condition might already be deleted");
@@ -401,6 +434,12 @@ export async function deleteFeatureFlag(
         databaseId: DATABASE_ID,
         tableId: FLAG_COLLECTION_ID,
         rowId: data.id,
+        transactionId: transaction.$id,
+      });
+
+      await database.updateTransaction({
+        transactionId: transaction.$id,
+        commit: true,
       });
 
       revalidateTag(`feature-flags:${flag.teamId}`);
@@ -413,6 +452,7 @@ export async function deleteFeatureFlag(
       };
     } catch (error) {
       console.error("Error deleting feature flag:", error);
+
       return {
         success: false,
         message: "Failed to delete feature flag",
@@ -492,6 +532,10 @@ export async function toggleFeatureFlagApproval(
     }
 
     try {
+      const transaction = await database.createTransaction({
+        ttl: 60,
+      });
+
       const updatedFlag = await database.updateRow<FeatureFlag>({
         databaseId: DATABASE_ID,
         tableId: FLAG_COLLECTION_ID,
@@ -499,6 +543,7 @@ export async function toggleFeatureFlagApproval(
         data: {
           approval: approval,
         },
+        transactionId: transaction.$id,
       });
 
       await database.updateRow<Approval>({
@@ -511,6 +556,12 @@ export async function toggleFeatureFlagApproval(
           teamId: teamId,
           approval: approval,
         },
+        transactionId: transaction.$id,
+      });
+
+      await database.updateTransaction({
+        transactionId: transaction.$id,
+        commit: true,
       });
 
       revalidateTag(`feature-flags:${teamId}`);
@@ -523,6 +574,7 @@ export async function toggleFeatureFlagApproval(
       };
     } catch (error) {
       console.error("Error updating feature flag approval status:", error);
+
       return {
         success: false,
         message: "Failed to update feature flag approval status",
