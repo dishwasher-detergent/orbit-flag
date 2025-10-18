@@ -103,7 +103,6 @@ export const createFeatureFlagSchema = z.object({
 
 export type CreateFeatureFlagFormData = z.infer<typeof createFeatureFlagSchema>;
 
-// Schema for editing feature flags
 export const editFeatureFlagSchema = createFeatureFlagSchema.extend({
   id: z.string().min(1, "Feature flag ID is required"),
 });

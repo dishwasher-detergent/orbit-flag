@@ -24,7 +24,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }>();
 
   const { teams, loading: teamLoading, refetchTeams } = useTeamData();
-  const { user, loading } = useUserData();
+  const { user, roles, loading } = useUserData(teamId);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -37,7 +37,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain />
+        <NavMain userRoles={roles} />
         {teamId && <NavTeam teamId={teamId} />}
         <div className="mt-auto p-2">
           <ThemeToggle />

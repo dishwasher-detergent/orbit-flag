@@ -1,3 +1,10 @@
-export default function TeamPage() {
-  return <div className="p-4">Team page works!</div>;
+import { redirect } from "next/navigation";
+
+export default async function TeamPage({
+  params,
+}: {
+  params: Promise<{ teamId: string }>;
+}) {
+  const { teamId } = await params;
+  redirect(`/app/teams/${teamId}`);
 }

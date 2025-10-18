@@ -353,6 +353,7 @@ export async function addMember(
 
       revalidateTag(`team:${teamId}`);
       revalidateTag(`teams:user-${user.$id}`);
+      revalidateTag(`teams:user-${data.userId}`);
 
       return {
         success: true,
@@ -424,6 +425,7 @@ export async function removeMember(
 
       revalidateTag(`team:${teamId}`);
       revalidateTag(`teams:user-${user.$id}`);
+      revalidateTag(`teams:user-${userId}`);
 
       return {
         success: true,
@@ -469,6 +471,7 @@ export async function promoteToAdmin(
 
       revalidateTag(`team:${teamId}`);
       revalidateTag(`teams:user-${user.$id}`);
+      revalidateTag(`teams:user-${userId}`);
 
       return {
         success: true,
@@ -518,6 +521,7 @@ export async function removeAdminRole(
 
       revalidateTag(`team:${teamId}`);
       revalidateTag(`teams:user-${user.$id}`);
+      revalidateTag(`teams:user-${userId}`);
 
       return {
         success: true,

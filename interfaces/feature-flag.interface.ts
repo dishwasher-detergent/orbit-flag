@@ -4,7 +4,8 @@ export interface FeatureFlag extends Models.Row {
   name: string;
   key: string;
   description: string;
-  status: "active" | "inactive" | "archived";
+  status: FeatureFlagStatus;
+  approval: FeatureFlagApproval;
   teamId: string;
   variationIds: string[];
   variations?: Variation[];
@@ -24,3 +25,7 @@ export interface Condition extends Models.Row {
   values: string[];
   variationId: string;
 }
+
+export type FeatureFlagStatus = "active" | "inactive" | "archived";
+
+export type FeatureFlagApproval = "approved" | "rejected" | "pending";

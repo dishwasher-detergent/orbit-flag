@@ -16,8 +16,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { ADMIN_ROLE } from "@/constants/team.constants";
 
-export function NavMain() {
+interface NavMainProps {
+  userRoles?: string[];
+}
+
+export function NavMain({ userRoles }: NavMainProps) {
   const { teamId } = useParams<{
     teamId: string;
   }>();
@@ -26,18 +31,20 @@ export function NavMain() {
 
   return (
     <>
-      <SidebarGroup>
-        <SidebarMenu>
-          <SidebarMenuItem key="approvals">
-            <SidebarMenuButton asChild tooltip="Approvals">
-              <Link href={`/app/teams/${teamId}/approvals`}>
-                <LucideThumbsUp />
-                <span>Approvals</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarGroup>
+      {userRoles?.includes(ADMIN_ROLE) && (
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem key="approvals">
+              <SidebarMenuButton asChild tooltip="Approvals">
+                <Link href={`/app/teams/${teamId}/approvals`}>
+                  <LucideThumbsUp />
+                  <span>Approvals</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+      )}
       <SidebarGroup>
         <SidebarGroupLabel>Platform</SidebarGroupLabel>
         <SidebarMenu>

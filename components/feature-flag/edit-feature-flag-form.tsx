@@ -87,11 +87,10 @@ export function EditFeatureFlagForm({
     const newStatus = currentStatus === "active" ? "inactive" : "active";
 
     try {
-      const result = await toggleFeatureFlag(flag.$id, newStatus);
+      const result = await toggleFeatureFlag(flag.$id, teamId, newStatus);
 
       if (result.success) {
         setCurrentStatus(newStatus);
-        // Update the form status as well
         form.setValue("status", newStatus as any);
         toast.success(
           `Feature flag ${

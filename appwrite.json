@@ -282,6 +282,19 @@
                     "array": true,
                     "size": 32,
                     "default": null
+                },
+                {
+                    "key": "approval",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "elements": [
+                        "approved",
+                        "rejected",
+                        "pending"
+                    ],
+                    "format": "enum",
+                    "default": "pending"
                 }
             ],
             "indexes": []
@@ -310,6 +323,56 @@
                     "required": true,
                     "array": false,
                     "size": 32,
+                    "default": null
+                },
+                {
+                    "key": "flagKey",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "approval",
+            "$permissions": [],
+            "databaseId": "orbit-flag",
+            "name": "approval",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "approverUserId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 32,
+                    "default": null
+                },
+                {
+                    "key": "flagId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 32,
+                    "default": null
+                },
+                {
+                    "key": "teamId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 32,
+                    "default": null
+                },
+                {
+                    "key": "isActive",
+                    "type": "boolean",
+                    "required": true,
+                    "array": false,
                     "default": null
                 }
             ],

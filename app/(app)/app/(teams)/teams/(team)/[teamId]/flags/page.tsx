@@ -48,6 +48,7 @@ export default async function FlagsPage({
                   <TableHead className="w-full">Name</TableHead>
                   <TableHead>Key</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Approval</TableHead>
                   <TableHead>Variations</TableHead>
                   <TableHead>Conditions</TableHead>
                   <TableHead>Created</TableHead>
@@ -83,6 +84,9 @@ export default async function FlagsPage({
                     </TableCell>
                     <TableCell className="align-top">
                       <Badge variant={flag.status}>{flag.status}</Badge>
+                    </TableCell>
+                    <TableCell className="align-top">
+                      <Badge variant={flag.approval}>{flag.approval}</Badge>
                     </TableCell>
                     <TableCell className="align-top">
                       <div className="flex items-center gap-1">

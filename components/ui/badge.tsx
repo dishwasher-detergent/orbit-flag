@@ -19,7 +19,10 @@ const badgeVariants = cva(
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         active: "bg-emerald-600/80 text-white border-1 border-emerald-600",
         inactive: "bg-amber-600/80 text-white border-1 border-amber-600",
-        archived: "bg-rose-600/80 text-white border-1 border-rose-600",
+        archived: "bg-slate-600/80 text-white border-1 border-slate-600",
+        approved: "bg-blue-600/80 text-white border-1 border-blue-600",
+        rejected: "bg-rose-600/80 text-white border-1 border-rose-600",
+        pending: "bg-amber-600/80 text-white border-1 border-amber-600",
       },
     },
     defaultVariants: {
