@@ -42,6 +42,9 @@ export async function createFeatureFlag(
 ): Promise<Result<FeatureFlag>> {
   return withAuth(async (user) => {
     const { table: database } = await createSessionClient();
+    const { data: roles } = await getCurrentUserRoles(data.teamId);
+
+    const isAdmin = roles!.includes(ADMIN_ROLE);
 
     const permissions = [
       Permission.read(Role.team(data.teamId)),
@@ -110,7 +113,9 @@ export async function createFeatureFlag(
           key: data.key,
           description: data.description || "",
           status: data.status,
-          approval: FEATURE_FLAG_APPROVAL.PENDING,
+          approval: isAdmin
+            ? FEATURE_FLAG_APPROVAL.APPROVED
+            : FEATURE_FLAG_APPROVAL.NEW,
           teamId: data.teamId,
           variationIds,
           conditionIds,
@@ -524,6 +529,11 @@ export async function toggleFeatureFlagApproval(
 
     const isAdmin = roles!.includes(ADMIN_ROLE);
 
+    const permissions = [
+      Permission.read(Role.team(teamId)),
+      Permission.write(Role.team(teamId)),
+    ];
+
     if (!isAdmin) {
       return {
         success: false,
@@ -546,16 +556,17 @@ export async function toggleFeatureFlagApproval(
         transactionId: transaction.$id,
       });
 
-      await database.updateRow<Approval>({
+      await database.createRow<Approval>({
         databaseId: DATABASE_ID,
         tableId: APPROVAL_COLLECTION_ID,
         rowId: ID.unique(),
         data: {
-          approvalUserId: user.$id,
+          approverUserId: user.$id,
           flagId: id,
           teamId: teamId,
           approval: approval,
         },
+        permissions: permissions,
         transactionId: transaction.$id,
       });
 

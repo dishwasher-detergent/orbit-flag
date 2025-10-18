@@ -28,4 +28,4 @@ export interface Condition extends Models.Row {
 
 export type FeatureFlagStatus = "active" | "inactive" | "archived";
 
-export type FeatureFlagApproval = "approved" | "rejected" | "pending";
+export type FeatureFlagApproval = "approved" | "rejected" | "pending" | "new";

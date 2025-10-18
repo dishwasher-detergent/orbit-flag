@@ -18,6 +18,7 @@ export enum FEATURE_FLAG_APPROVAL {
   APPROVED = "approved",
   REJECTED = "rejected",
   PENDING = "pending",
+  NEW = "new",
 }
 
 export enum FEATURE_FLAG_VALUES {
