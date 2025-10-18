@@ -35,8 +35,6 @@ export default async function SettingsPage({
     redirect("/app");
   }
 
-  console.log(data);
-
   return (
     <>
       <PageHeader
