@@ -45,9 +45,9 @@ export async function getTeamById(id: string): Promise<Result<TeamData>> {
       async (id) => {
         return getTeamByIdCore(database, team, id);
       },
-      ["team", `team:${id}`, id],
+      ["teams", `team:${id}`, id],
       {
-        tags: ["team", `team:${id}`],
+        tags: ["teams", `team:${id}`],
         revalidate: 600,
       }
     )(id);

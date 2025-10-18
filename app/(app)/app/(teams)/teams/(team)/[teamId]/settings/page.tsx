@@ -35,12 +35,14 @@ export default async function SettingsPage({
     redirect("/app");
   }
 
+  console.log(data);
+
   return (
     <>
       <PageHeader
         icon={LucideSettings}
         title={data.name}
-        description={data.description || "Team Settings"}
+        description={data.about || "Team Settings"}
       >
         {isMember && (
           <TeamActions data={data} isOwner={isOwner} isAdmin={isAdmin} />

@@ -6,7 +6,6 @@ export interface TeamData extends Models.Row {
   about: string;
   name: string;
   members?: UserMemberData[];
-  description?: string;
   whitelist?: URL[];
 }
 

@@ -33,7 +33,7 @@ export default async function ContextPage({
         </section>
       ) : (
         <section className="border bg-sidebar rounded-lg p-1">
-          <div className="p-4 border bg-background rounded-lg flex flex-col items-center">
+          <div className="p-4 border border-input bg-background rounded-lg flex flex-col items-center">
             <LucideFingerprint className="size-12 text-muted-foreground/50 mb-2" />
             <h3 className="text-lg font-semibold mb-2 text-center">
               No contexts yet
