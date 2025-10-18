@@ -20,6 +20,8 @@ export const CONDITION_COLLECTION_ID = process.env
   .NEXT_PUBLIC_CONDITION_COLLECTION_ID as string;
 export const CONTEXT_COLLECTION_ID = process.env
   .NEXT_PUBLIC_CONTEXT_COLLECTION_ID as string;
+export const APPROVAL_COLLECTION_ID = process.env
+  .NEXT_PUBLIC_APPROVAL_COLLECTION_ID as string;
 
 // Cookie
 export const COOKIE_KEY = `a_session_${PROJECT_ID}`;

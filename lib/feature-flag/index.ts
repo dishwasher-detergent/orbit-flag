@@ -5,6 +5,7 @@ import { ID, Permission, Query, Role, TablesDB } from "node-appwrite";
 
 import { FEATURE_FLAG_APPROVAL } from "@/constants/feature-flag.constants";
 import { ADMIN_ROLE } from "@/constants/team.constants";
+import { Approval } from "@/interfaces/approval.interface";
 import {
   Condition,
   FeatureFlag,
@@ -15,6 +16,7 @@ import {
 import { Result } from "@/interfaces/result.interface";
 import { withAuth } from "@/lib/auth";
 import {
+  APPROVAL_COLLECTION_ID,
   CONDITION_COLLECTION_ID,
   DATABASE_ID,
   FLAG_COLLECTION_ID,
@@ -495,6 +497,18 @@ export async function toggleFeatureFlagApproval(
         tableId: FLAG_COLLECTION_ID,
         rowId: id,
         data: {
+          approval: approval,
+        },
+      });
+
+      await database.updateRow<Approval>({
+        databaseId: DATABASE_ID,
+        tableId: APPROVAL_COLLECTION_ID,
+        rowId: ID.unique(),
+        data: {
+          approvalUserId: user.$id,
+          flagId: id,
+          teamId: teamId,
           approval: approval,
         },
       });
