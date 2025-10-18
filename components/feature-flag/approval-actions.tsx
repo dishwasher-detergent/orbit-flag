@@ -35,7 +35,7 @@ export function ApprovalActions({ flag, teamId }: ApprovalActionsProps) {
       } else {
         toast.error(result.message || "Failed to approve feature flag");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to approve feature flag");
     } finally {
       setIsApproving(false);
@@ -57,7 +57,7 @@ export function ApprovalActions({ flag, teamId }: ApprovalActionsProps) {
       } else {
         toast.error(result.message || "Failed to reject feature flag");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to reject feature flag");
     } finally {
       setIsRejecting(false);

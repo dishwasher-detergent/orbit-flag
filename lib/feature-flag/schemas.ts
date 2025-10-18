@@ -76,11 +76,7 @@ export const createFeatureFlagSchema = z.object({
     )
     .optional(),
   status: z
-    .enum([
-      FEATURE_FLAG_STATUS.ACTIVE,
-      FEATURE_FLAG_STATUS.INACTIVE,
-      FEATURE_FLAG_STATUS.ARCHIVED,
-    ] as const)
+    .nativeEnum(FEATURE_FLAG_STATUS)
     .default(FEATURE_FLAG_STATUS.INACTIVE),
   variations: z
     .array(variationsSchema)

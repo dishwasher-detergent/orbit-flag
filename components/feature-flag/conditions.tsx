@@ -26,6 +26,7 @@ import { useWatch } from "react-hook-form";
 import MultipleSelector from "../ui/multiple-selector";
 
 interface FeatureFlagConditionsProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<any>;
   name?: string;
 }

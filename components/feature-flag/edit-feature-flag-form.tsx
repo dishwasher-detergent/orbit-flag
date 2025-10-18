@@ -21,6 +21,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  FEATURE_FLAG_OPERATORS,
+  FEATURE_FLAG_STATUS,
+} from "@/constants/feature-flag.constants";
 import { FeatureFlag } from "@/interfaces/feature-flag.interface";
 import { toggleFeatureFlag, updateFeatureFlag } from "@/lib/feature-flag";
 import {
@@ -50,17 +54,17 @@ export function EditFeatureFlagForm({
       name: flag.name,
       key: flag.key,
       description: flag.description || "",
-      status: flag.status as any,
-      variations: (flag.variations || []).map((v: any) => ({
+      status: flag.status as FEATURE_FLAG_STATUS,
+      variations: (flag.variations || []).map((v) => ({
         id: v.$id,
         name: v.name,
         value: v.value as "true" | "false",
         isDefault: v.isDefault,
       })),
-      conditions: (flag.conditions || []).map((c: any) => ({
+      conditions: (flag.conditions || []).map((c) => ({
         id: c.$id,
         contextAttribute: c.contextAttribute,
-        operator: c.operator,
+        operator: c.operator as FEATURE_FLAG_OPERATORS,
         values: c.values,
         variationId: c.variationId,
       })),
@@ -91,7 +95,7 @@ export function EditFeatureFlagForm({
 
       if (result.success) {
         setCurrentStatus(newStatus);
-        form.setValue("status", newStatus as any);
+        form.setValue("status", newStatus as FEATURE_FLAG_STATUS);
         toast.success(
           `Feature flag ${
             newStatus === "active" ? "activated" : "deactivated"
@@ -100,7 +104,7 @@ export function EditFeatureFlagForm({
       } else {
         toast.error(result.message);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to update feature flag status");
     } finally {
       setIsToggling(false);

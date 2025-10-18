@@ -25,6 +25,7 @@ import { useMemo } from "react";
 import { Checkbox } from "../ui/checkbox";
 
 interface FeatureFlagVariantsProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<any>;
   name?: string;
 }

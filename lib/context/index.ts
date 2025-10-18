@@ -25,6 +25,7 @@ export async function getContextByTeam(
 export async function createContext(
   teamId: string,
   flagKey: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any
 ): Promise<Result<Context>> {
   return withAuth(async () => {
@@ -65,6 +66,7 @@ export async function getContextByTeamAdmin(
 export async function createContextAdmin(
   teamId: string,
   flagKey: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any
 ): Promise<Result<Context>> {
   const { table: database } = await createAdminClient();
@@ -125,6 +127,7 @@ async function createContextCore(
   database: TablesDB,
   teamId: string,
   flagKey: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any,
   permissions: string[] = []
 ): Promise<Result<Context>> {

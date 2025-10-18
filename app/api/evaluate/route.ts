@@ -6,6 +6,7 @@ import {
   FEATURE_FLAG_OPERATORS,
   FEATURE_FLAG_STATUS,
 } from "@/constants/feature-flag.constants";
+import { Condition, FeatureFlag } from "@/interfaces/feature-flag.interface";
 import { createContextAdmin } from "@/lib/context";
 import { getFeatureFlagsByTeamAdmin } from "@/lib/feature-flag";
 import { getTeamByIdAdmin } from "@/lib/team";
@@ -66,6 +67,8 @@ async function checkWhitelist(
             return true;
           }
         } catch (error) {
+          console.error("Error checking request origin:", error);
+
           continue;
         }
       }
@@ -85,6 +88,7 @@ async function evaluateFlag(
   request: NextRequest,
   teamId: string,
   flagKey: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   context: Record<string, any>
 ): Promise<NextResponse<EvaluateResponse>> {
   const isWhitelisted = await checkWhitelist(request, teamId);
@@ -219,12 +223,16 @@ export async function POST(
 /**
  * Evaluate conditions and return the appropriate variation
  */
-function evaluateConditions(flag: any, context: Record<string, any>) {
+function evaluateConditions(
+  flag: FeatureFlag,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context: Record<string, any>
+) {
   const variations = flag.variations || [];
   const conditions = flag.conditions || [];
 
   if (conditions.length === 0) {
-    const defaultVariation = variations.find((v: any) => v.isDefault);
+    const defaultVariation = variations.find((v) => v.isDefault);
     return {
       value: defaultVariation?.value || null,
       name: defaultVariation?.name || null,
@@ -234,9 +242,7 @@ function evaluateConditions(flag: any, context: Record<string, any>) {
 
   for (const condition of conditions) {
     if (evaluateCondition(condition, context)) {
-      const variation = variations.find(
-        (v: any) => v.$id === condition.variationId
-      );
+      const variation = variations.find((v) => v.$id === condition.variationId);
       return {
         value: variation?.value || null,
         name: variation?.name || null,
@@ -247,7 +253,7 @@ function evaluateConditions(flag: any, context: Record<string, any>) {
     }
   }
 
-  const defaultVariation = variations.find((v: any) => v.isDefault);
+  const defaultVariation = variations.find((v) => v.isDefault);
   return {
     value: defaultVariation?.value || null,
     name: defaultVariation?.name || null,
@@ -259,7 +265,8 @@ function evaluateConditions(flag: any, context: Record<string, any>) {
  * Evaluate a single condition against the context
  */
 function evaluateCondition(
-  condition: any,
+  condition: Condition,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   context: Record<string, any>
 ): boolean {
   const { contextAttribute, operator, values } = condition;

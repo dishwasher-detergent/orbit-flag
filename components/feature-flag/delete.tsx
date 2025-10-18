@@ -44,7 +44,7 @@ export function DeleteFeatureFlag({
       setOpen={setOpen}
       button={
         <Button
-          onClick={(e) => {
+          onClick={() => {
             setOpen(!open);
           }}
           variant="destructive"

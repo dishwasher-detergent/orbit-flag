@@ -40,7 +40,7 @@ import {
 export async function createFeatureFlag(
   data: CreateFeatureFlagFormData
 ): Promise<Result<FeatureFlag>> {
-  return withAuth(async (user) => {
+  return withAuth(async () => {
     const { table: database } = await createSessionClient();
     const { data: roles } = await getCurrentUserRoles(data.teamId);
 
@@ -256,7 +256,7 @@ export async function getFeatureFlagById(
 export async function updateFeatureFlag(
   data: EditFeatureFlagFormData
 ): Promise<Result<FeatureFlag>> {
-  return withAuth(async (user) => {
+  return withAuth(async () => {
     const { table: database } = await createSessionClient();
 
     const permissions = [
@@ -477,13 +477,13 @@ export async function toggleFeatureFlag(
   teamId: string,
   status: FeatureFlagStatus
 ): Promise<Result<FeatureFlag>> {
-  return withAuth(async (user) => {
+  return withAuth(async () => {
     const { table: database } = await createSessionClient();
     const { data: roles } = await getCurrentUserRoles(teamId);
 
     const isAdmin = roles!.includes(ADMIN_ROLE);
 
-    let data = {
+    const data = {
       status: status,
       approval: FEATURE_FLAG_APPROVAL.PENDING,
     };
