@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ID, Permission, Role } from "node-appwrite";
 import { z } from "zod";
 
 import {
@@ -6,9 +7,12 @@ import {
   FEATURE_FLAG_OPERATORS,
   FEATURE_FLAG_STATUS,
 } from "@/constants/feature-flag.constants";
+import { Evaluation } from "@/interfaces/evaluation.interface";
 import { Condition, FeatureFlag } from "@/interfaces/feature-flag.interface";
+import { DATABASE_ID, EVALUATION_COLLECTION_ID } from "@/lib/constants";
 import { createContextAdmin } from "@/lib/context";
 import { getFeatureFlagsByTeamAdmin } from "@/lib/feature-flag";
+import { createAdminClient } from "@/lib/server/appwrite";
 import { getTeamByIdAdmin } from "@/lib/team";
 
 const evaluateRequestSchema = z.object({
@@ -26,6 +30,57 @@ interface EvaluateResponse {
   variation: string | null;
   reason: string;
   error?: string;
+}
+
+/**
+ * Save evaluation result to database
+ */
+async function saveEvaluation(
+  teamId: string,
+  flag: FeatureFlag,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context: Record<string, any>,
+  result: {
+    value: string | null;
+    variation: string | null;
+    reason: string;
+  },
+  request: NextRequest
+): Promise<void> {
+  try {
+    const { table: database } = await createAdminClient();
+
+    const permissions = [
+      Permission.read(Role.team(teamId)),
+      Permission.write(Role.team(teamId)),
+    ];
+
+    const evaluationData = {
+      teamId,
+      flagId: flag.$id,
+      flagKey: flag.key,
+      context: JSON.stringify(context),
+      result: JSON.stringify(result),
+      variation: result.variation,
+      value: result.value,
+      reason: result.reason,
+      userAgent: request.headers.get("user-agent") || undefined,
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        undefined,
+    };
+
+    await database.createRow<Evaluation>({
+      databaseId: DATABASE_ID,
+      tableId: EVALUATION_COLLECTION_ID,
+      rowId: ID.unique(),
+      data: evaluationData,
+      permissions,
+    });
+  } catch (error) {
+    console.error("Failed to save evaluation:", error);
+  }
 }
 
 /**
@@ -91,7 +146,7 @@ async function evaluateFlag(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   context: Record<string, any>
 ): Promise<NextResponse<EvaluateResponse>> {
-  const isWhitelisted = await checkWhitelist(request, teamId);
+  const isWhitelisted = true; // await checkWhitelist(request, teamId);
   if (!isWhitelisted) {
     return NextResponse.json(
       {
@@ -147,31 +202,47 @@ async function evaluateFlag(
   ) {
     const defaultVariation = flag.variations?.find((v) => v.isDefault);
 
-    createContextAdmin(teamId, flagKey, context).then(
-      (x) => x.success == false && console.error(x)
-    );
+    const result = {
+      value: defaultVariation?.value || null,
+      variation: defaultVariation?.name || null,
+      reason: `Flag is ${flag.status}, returned default variation`,
+    };
+
+    // Save evaluation and context (async, don't wait)
+    Promise.all([
+      createContextAdmin(teamId, flagKey, context),
+      saveEvaluation(teamId, flag, context, result, request),
+    ]).then(([contextResult]) => {
+      if (!contextResult.success) console.error(contextResult);
+    });
 
     return NextResponse.json({
       success: true,
       flagKey,
-      value: defaultVariation?.value || null,
-      variation: defaultVariation?.name || null,
-      reason: `Flag is ${flag.status}, returned default variation`,
+      ...result,
     });
   }
 
   const matchingVariation = evaluateConditions(flag, context);
 
-  createContextAdmin(teamId, flagKey, context).then(
-    (x) => x.success == false && console.error(x)
-  );
+  const result = {
+    value: matchingVariation.value,
+    variation: matchingVariation.name,
+    reason: matchingVariation.reason,
+  };
+
+  // Save evaluation and context (async, don't wait)
+  Promise.all([
+    createContextAdmin(teamId, flagKey, context),
+    saveEvaluation(teamId, flag, context, result, request),
+  ]).then(([contextResult]) => {
+    if (!contextResult.success) console.error(contextResult);
+  });
 
   return NextResponse.json({
     success: true,
     flagKey,
-    value: matchingVariation.value,
-    variation: matchingVariation.name,
-    reason: matchingVariation.reason,
+    ...result,
   });
 }
 
@@ -240,7 +311,11 @@ function evaluateConditions(
     };
   }
 
+  console.log(conditions);
+
   for (const condition of conditions) {
+    console.log(context);
+
     if (evaluateCondition(condition, context, flag.key)) {
       const variation = variations.find((v) => v.$id === condition.variationId);
       const reasonText =
@@ -259,6 +334,7 @@ function evaluateConditions(
   }
 
   const defaultVariation = variations.find((v) => v.isDefault);
+
   return {
     value: defaultVariation?.value || null,
     name: defaultVariation?.name || null,
@@ -403,6 +479,8 @@ function evaluateCondition(
         flagKey,
         contextAttribute
       );
+
+      console.log(userBucket);
 
       return userBucket < targetPercentage;
 

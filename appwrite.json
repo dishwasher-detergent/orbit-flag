@@ -74,7 +74,14 @@
                     "default": null
                 }
             ],
-            "indexes": []
+            "indexes": [
+                {
+                    "key": "name_search",
+                    "type": "key",
+                    "attributes": ["name"],
+                    "orders": ["ASC"]
+                }
+            ]
         },
         {
             "$id": "team",
@@ -111,7 +118,14 @@
                     "default": null
                 }
             ],
-            "indexes": []
+            "indexes": [
+                {
+                    "key": "name_search",
+                    "type": "key",
+                    "attributes": ["name"],
+                    "orders": ["ASC"]
+                }
+            ]
         },
         {
             "$id": "variation",
@@ -151,7 +165,14 @@
                     "default": null
                 }
             ],
-            "indexes": []
+            "indexes": [
+                {
+                    "key": "value_default",
+                    "type": "key",
+                    "attributes": ["value", "isDefault"],
+                    "orders": ["ASC", "DESC"]
+                }
+            ]
         },
         {
             "$id": "condition",
@@ -188,7 +209,8 @@
                         "greater_than_or_equal",
                         "less_than_or_equal",
                         "starts_with",
-                        "ends_with"
+                        "ends_with",
+                        "percentage_rollout"
                     ],
                     "format": "enum",
                     "default": null
@@ -210,7 +232,20 @@
                     "default": null
                 }
             ],
-            "indexes": []
+            "indexes": [
+                {
+                    "key": "variationId_operator",
+                    "type": "key",
+                    "attributes": ["variationId", "operator"],
+                    "orders": ["ASC", "ASC"]
+                },
+                {
+                    "key": "contextAttribute_operator",
+                    "type": "key",
+                    "attributes": ["contextAttribute", "operator"],
+                    "orders": ["ASC", "ASC"]
+                }
+            ]
         },
         {
             "$id": "flag",
@@ -291,13 +326,45 @@
                     "elements": [
                         "approved",
                         "rejected",
-                        "pending"
+                        "pending",
+                        "new"
                     ],
                     "format": "enum",
-                    "default": "pending"
+                    "default": "new"
                 }
             ],
-            "indexes": []
+            "indexes": [
+                {
+                    "key": "teamId_status",
+                    "type": "key",
+                    "attributes": ["teamId", "status"],
+                    "orders": ["ASC", "ASC"]
+                },
+                {
+                    "key": "teamId_approval",
+                    "type": "key",
+                    "attributes": ["teamId", "approval"],
+                    "orders": ["ASC", "ASC"]
+                },
+                {
+                    "key": "key_teamId",
+                    "type": "key",
+                    "attributes": ["key", "teamId"],
+                    "orders": ["ASC", "ASC"]
+                },
+                {
+                    "key": "teamId_created",
+                    "type": "key",
+                    "attributes": ["teamId", "$createdAt"],
+                    "orders": ["ASC", "DESC"]
+                },
+                {
+                    "key": "status_approval",
+                    "type": "key",
+                    "attributes": ["status", "approval"],
+                    "orders": ["ASC", "ASC"]
+                }
+            ]
         },
         {
             "$id": "context",
@@ -334,11 +401,26 @@
                     "default": null
                 }
             ],
-            "indexes": []
+            "indexes": [
+                {
+                    "key": "teamId_flagKey",
+                    "type": "key",
+                    "attributes": ["teamId", "flagKey"],
+                    "orders": ["ASC", "ASC"]
+                },
+                {
+                    "key": "flagKey_created",
+                    "type": "key",
+                    "attributes": ["flagKey", "$createdAt"],
+                    "orders": ["ASC", "DESC"]
+                }
+            ]
         },
         {
             "$id": "approval",
-            "$permissions": [],
+            "$permissions": [
+                "create(\"users\")"
+            ],
             "databaseId": "orbit-flag",
             "name": "approval",
             "enabled": true,
@@ -369,14 +451,143 @@
                     "default": null
                 },
                 {
-                    "key": "isActive",
-                    "type": "boolean",
+                    "key": "approval",
+                    "type": "string",
                     "required": true,
                     "array": false,
+                    "elements": [
+                        "approved",
+                        "rejected",
+                        "pending"
+                    ],
+                    "format": "enum",
                     "default": null
                 }
             ],
-            "indexes": []
+            "indexes": [
+                {
+                    "key": "flagId_created",
+                    "type": "key",
+                    "attributes": ["flagId", "$createdAt"],
+                    "orders": ["ASC", "DESC"]
+                },
+                {
+                    "key": "teamId_created",
+                    "type": "key",
+                    "attributes": ["teamId", "$createdAt"],
+                    "orders": ["ASC", "DESC"]
+                },
+                {
+                    "key": "approverUserId_created",
+                    "type": "key",
+                    "attributes": ["approverUserId", "$createdAt"],
+                    "orders": ["ASC", "DESC"]
+                }
+            ]
+        },
+        {
+            "$id": "evaluation",
+            "$permissions": [],
+            "databaseId": "orbit-flag",
+            "name": "evaluation",
+            "enabled": true,
+            "documentSecurity": true,
+            "attributes": [
+                {
+                    "key": "teamId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 32,
+                    "default": null
+                },
+                {
+                    "key": "flagId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 32,
+                    "default": null
+                },
+                {
+                    "key": "flagKey",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "context",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 8192,
+                    "default": null
+                },
+                {
+                    "key": "result",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 2048,
+                    "default": null
+                },
+                {
+                    "key": "variation",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "value",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "reason",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 512,
+                    "default": null
+                },
+                {
+                    "key": "userAgent",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 512,
+                    "default": null
+                },
+                {
+                    "key": "ipAddress",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 45,
+                    "default": null
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "flagId_created",
+                    "type": "key",
+                    "attributes": ["flagId", "$createdAt"],
+                    "orders": ["ASC", "DESC"]
+                },
+                {
+                    "key": "teamId_created",
+                    "type": "key",
+                    "attributes": ["teamId", "$createdAt"],
+                    "orders": ["ASC", "DESC"]
+                }
+            ]
         }
     ],
     "buckets": [],

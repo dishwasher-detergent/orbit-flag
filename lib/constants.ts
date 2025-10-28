@@ -22,6 +22,8 @@ export const CONTEXT_COLLECTION_ID = process.env
   .NEXT_PUBLIC_CONTEXT_COLLECTION_ID as string;
 export const APPROVAL_COLLECTION_ID = process.env
   .NEXT_PUBLIC_APPROVAL_COLLECTION_ID as string;
+export const EVALUATION_COLLECTION_ID = process.env
+  .NEXT_PUBLIC_EVALUATION_COLLECTION_ID as string;
 
 // Cookie
 export const COOKIE_KEY = `a_session_${PROJECT_ID}`;

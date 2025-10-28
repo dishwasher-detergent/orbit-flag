@@ -183,10 +183,9 @@ export function EditFeatureFlagForm({
           <Button type="button" variant="ghost" disabled={isPending} asChild>
             <Link href={`/app/teams/${teamId}/flags`}>Cancel</Link>
           </Button>
-          <DeleteFeatureFlag flag={flag} teamId={teamId} />
           <Button
             type="button"
-            variant={currentStatus === "active" ? "destructive" : "outline"}
+            variant={currentStatus === "active" ? "ghostDestructive" : "ghost"}
             disabled={isPending || isToggling}
             onClick={handleToggleStatus}
           >
@@ -213,6 +212,7 @@ export function EditFeatureFlagForm({
               </>
             )}
           </Button>
+          <DeleteFeatureFlag flag={flag} teamId={teamId} />
           <Button type="submit" disabled={isPending || isToggling}>
             {isPending ? (
               <>
