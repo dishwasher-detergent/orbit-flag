@@ -39,4 +39,5 @@ export enum FEATURE_FLAG_OPERATORS {
   LESS_THAN_OR_EQUAL = "less_than_or_equal",
   STARTS_WITH = "starts_with",
   ENDS_WITH = "ends_with",
+  PERCENTAGE_ROLLOUT = "percentage_rollout",
 }

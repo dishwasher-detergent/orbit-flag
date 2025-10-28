@@ -1,11 +1,13 @@
 "use client";
 
 import { LucideMinus, LucidePlus } from "lucide-react";
-import { Control, useFieldArray } from "react-hook-form";
+import { useMemo } from "react";
+import { Control, useFieldArray, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -21,8 +23,6 @@ import {
 } from "@/components/ui/select";
 import { FEATURE_FLAG_OPERATORS } from "@/constants/feature-flag.constants";
 import { Conditions, Variations } from "@/lib/feature-flag/schemas";
-import { useMemo } from "react";
-import { useWatch } from "react-hook-form";
 import MultipleSelector from "../ui/multiple-selector";
 
 interface FeatureFlagConditionsProps {
@@ -110,19 +110,39 @@ export function FeatureFlagConditions({
               <FormField
                 control={control}
                 name={`${name}.${index}.contextAttribute`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Context Attribute</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="bg-background"
-                        placeholder="e.g., userId, email, plan"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const currentCondition = useWatch({
+                    control,
+                    name: `${name}.${index}`,
+                  });
+                  const isPercentageRollout =
+                    currentCondition?.operator ===
+                    FEATURE_FLAG_OPERATORS.PERCENTAGE_ROLLOUT;
+
+                  return (
+                    <FormItem>
+                      <FormLabel>Context Attribute</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="bg-background"
+                          placeholder={
+                            isPercentageRollout
+                              ? "e.g., userId (for consistent rollout)"
+                              : "e.g., userId, email, plan"
+                          }
+                          {...field}
+                        />
+                      </FormControl>
+                      {isPercentageRollout && (
+                        <FormDescription>
+                          Use a consistent user identifier for stable rollouts
+                          (e.g., userId, email)
+                        </FormDescription>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
               <FormField
                 control={control}
@@ -156,34 +176,70 @@ export function FeatureFlagConditions({
               <FormField
                 control={control}
                 name={`${name}.${index}.values`}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Values</FormLabel>
-                    <FormControl>
-                      <MultipleSelector
-                        value={
-                          field.value?.map((val: string) => ({
-                            value: val,
-                            label: val,
-                          })) || []
-                        }
-                        onChange={(
-                          selected: { value: string; label: string }[]
-                        ) => {
-                          field.onChange(selected.map((item) => item.value));
-                        }}
-                        creatable
-                        placeholder="Add values"
-                        emptyIndicator={
-                          <p className="text-muted-foreground text-center text-sm leading-4 font-semibold">
-                            No values found.
-                          </p>
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const currentCondition = useWatch({
+                    control,
+                    name: `${name}.${index}`,
+                  });
+                  const isPercentageRollout =
+                    currentCondition?.operator ===
+                    FEATURE_FLAG_OPERATORS.PERCENTAGE_ROLLOUT;
+
+                  return (
+                    <FormItem className="flex-1">
+                      <FormLabel>
+                        {isPercentageRollout ? "Percentage" : "Values"}
+                      </FormLabel>
+                      <FormControl>
+                        {isPercentageRollout ? (
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            placeholder="50"
+                            className="bg-background"
+                            value={field.value?.[0] || ""}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              field.onChange(value ? [value] : []);
+                            }}
+                          />
+                        ) : (
+                          <MultipleSelector
+                            value={
+                              field.value?.map((val: string) => ({
+                                value: val,
+                                label: val,
+                              })) || []
+                            }
+                            onChange={(
+                              selected: { value: string; label: string }[]
+                            ) => {
+                              field.onChange(
+                                selected.map((item) => item.value)
+                              );
+                            }}
+                            creatable
+                            placeholder="Add values"
+                            emptyIndicator={
+                              <p className="text-muted-foreground text-center text-sm leading-4 font-semibold">
+                                No values found.
+                              </p>
+                            }
+                          />
+                        )}
+                      </FormControl>
+                      {isPercentageRollout && (
+                        <FormDescription>
+                          Percentage of users who will receive this variation
+                          (0-100)
+                        </FormDescription>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
               <FormField
                 control={control}

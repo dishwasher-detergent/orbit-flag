@@ -241,14 +241,19 @@ function evaluateConditions(
   }
 
   for (const condition of conditions) {
-    if (evaluateCondition(condition, context)) {
+    if (evaluateCondition(condition, context, flag.key)) {
       const variation = variations.find((v) => v.$id === condition.variationId);
+      const reasonText =
+        condition.operator === FEATURE_FLAG_OPERATORS.PERCENTAGE_ROLLOUT
+          ? `Percentage rollout matched: ${condition.values[0]}% for ${condition.contextAttribute}`
+          : `Condition matched: ${condition.contextAttribute} ${
+              condition.operator
+            } ${condition.values.join(", ")}`;
+
       return {
         value: variation?.value || null,
         name: variation?.name || null,
-        reason: `Condition matched: ${condition.contextAttribute} ${
-          condition.operator
-        } ${condition.values.join(", ")}`,
+        reason: reasonText,
       };
     }
   }
@@ -262,12 +267,42 @@ function evaluateConditions(
 }
 
 /**
+ * Generate a consistent hash from a string
+ * Uses a simple hash function for consistent percentage calculations
+ */
+function simpleHash(input: string): number {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    const char = input.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+}
+
+/**
+ * Calculate percentage bucket for consistent rollouts
+ */
+function calculatePercentageBucket(
+  userIdentifier: string,
+  flagKey: string,
+  contextAttribute: string
+): number {
+  // Create a consistent seed from user identifier, flag key, and context attribute
+  const seed = `${userIdentifier}:${flagKey}:${contextAttribute}`;
+  const hash = simpleHash(seed);
+  // Return a value between 0 and 99 (inclusive)
+  return hash % 100;
+}
+
+/**
  * Evaluate a single condition against the context
  */
 function evaluateCondition(
   condition: Condition,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  context: Record<string, any>
+  context: Record<string, any>,
+  flagKey?: string
 ): boolean {
   const { contextAttribute, operator, values } = condition;
   const contextValue = context[contextAttribute];
@@ -339,6 +374,37 @@ function evaluateCondition(
 
     case FEATURE_FLAG_OPERATORS.ENDS_WITH:
       return values.some((value: string) => contextValueStr.endsWith(value));
+
+    case FEATURE_FLAG_OPERATORS.PERCENTAGE_ROLLOUT:
+      if (!flagKey) {
+        console.warn("Flag key is required for percentage rollout evaluation");
+        return false;
+      }
+
+      if (values.length !== 1) {
+        console.warn(
+          "Percentage rollout requires exactly one percentage value"
+        );
+        return false;
+      }
+
+      const targetPercentage = parseFloat(values[0]);
+      if (
+        isNaN(targetPercentage) ||
+        targetPercentage < 0 ||
+        targetPercentage > 100
+      ) {
+        console.warn("Invalid percentage value for rollout:", values[0]);
+        return false;
+      }
+
+      const userBucket = calculatePercentageBucket(
+        contextValueStr,
+        flagKey,
+        contextAttribute
+      );
+
+      return userBucket < targetPercentage;
 
     default:
       console.warn(`Unknown operator: ${operator}`);

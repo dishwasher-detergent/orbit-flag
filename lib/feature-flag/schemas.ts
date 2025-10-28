@@ -25,27 +25,45 @@ export const variationsSchema = z.object({
 
 export type Variations = z.infer<typeof variationsSchema>;
 
-export const conditionsSchema = z.object({
-  id: z.string().optional(),
-  contextAttribute: z
-    .string()
-    .min(1, "Context attribute is required")
-    .max(
-      FEATURE_FLAG_CONDITION_ATTRIBUTE_MAX_LENGTH,
-      `Context attribute must be less than ${FEATURE_FLAG_CONDITION_ATTRIBUTE_MAX_LENGTH} characters`
-    ),
-  operator: z.nativeEnum(FEATURE_FLAG_OPERATORS),
-  values: z.array(
-    z
+export const conditionsSchema = z
+  .object({
+    id: z.string().optional(),
+    contextAttribute: z
       .string()
-      .min(1, "Values are required")
+      .min(1, "Context attribute is required")
       .max(
-        FEATURE_FLAG_CONDITION_VALUE_MAX_LENGTH,
-        `Values must be less than ${FEATURE_FLAG_CONDITION_VALUE_MAX_LENGTH} characters`
-      )
-  ),
-  variationId: z.string().min(1, "Variation is required"),
-});
+        FEATURE_FLAG_CONDITION_ATTRIBUTE_MAX_LENGTH,
+        `Context attribute must be less than ${FEATURE_FLAG_CONDITION_ATTRIBUTE_MAX_LENGTH} characters`
+      ),
+    operator: z.nativeEnum(FEATURE_FLAG_OPERATORS),
+    values: z.array(
+      z
+        .string()
+        .min(1, "Values are required")
+        .max(
+          FEATURE_FLAG_CONDITION_VALUE_MAX_LENGTH,
+          `Values must be less than ${FEATURE_FLAG_CONDITION_VALUE_MAX_LENGTH} characters`
+        )
+    ),
+    variationId: z.string().min(1, "Variation is required"),
+  })
+  .refine(
+    (data) => {
+      if (data.operator === FEATURE_FLAG_OPERATORS.PERCENTAGE_ROLLOUT) {
+        if (data.values.length !== 1) {
+          return false;
+        }
+        const percentage = parseFloat(data.values[0]);
+        return !isNaN(percentage) && percentage >= 0 && percentage <= 100;
+      }
+      return true;
+    },
+    {
+      message:
+        "For percentage rollout, provide exactly one percentage value between 0 and 100",
+      path: ["values"],
+    }
+  );
 
 export type Conditions = z.infer<typeof conditionsSchema>;
 
