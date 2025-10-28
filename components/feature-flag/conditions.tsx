@@ -25,6 +25,199 @@ import { FEATURE_FLAG_OPERATORS } from "@/constants/feature-flag.constants";
 import { Conditions, Variations } from "@/lib/feature-flag/schemas";
 import MultipleSelector from "../ui/multiple-selector";
 
+interface ConditionItemProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  control: Control<any>;
+  name: string;
+  index: number;
+  variations: Variations[];
+  onRemove: () => void;
+  showRemoveButton: boolean;
+  priorityLabel: string;
+}
+
+function ConditionItem({
+  control,
+  name,
+  index,
+  variations,
+  onRemove,
+  showRemoveButton,
+  priorityLabel,
+}: ConditionItemProps) {
+  const currentCondition = useWatch({
+    control,
+    name: `${name}.${index}`,
+  });
+
+  const isPercentageRollout =
+    currentCondition?.operator === FEATURE_FLAG_OPERATORS.PERCENTAGE_ROLLOUT;
+
+  return (
+    <li className="w-full p-1 not-last:border-b border-dashed not-last:pb-8 relative">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center justify-center size-8 bg-background border text-muted-foreground rounded-lg text-xs font-semibold">
+          {index + 1}
+        </div>
+        <span className="text-sm text-muted-foreground">{priorityLabel}</span>
+      </div>
+      <div className="flex flex-row items-start gap-2">
+        <FormField
+          control={control}
+          name={`${name}.${index}.contextAttribute`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Context Attribute</FormLabel>
+              <FormControl>
+                <Input
+                  className="bg-background"
+                  placeholder={
+                    isPercentageRollout
+                      ? "e.g., userId (for consistent rollout)"
+                      : "e.g., userId, email, plan"
+                  }
+                  {...field}
+                />
+              </FormControl>
+              {isPercentageRollout && (
+                <FormDescription>
+                  Use a consistent user identifier for stable rollouts (e.g.,
+                  userId, email)
+                </FormDescription>
+              )}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name={`${name}.${index}.operator`}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Operator</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="bg-background w-full">
+                    <SelectValue placeholder="Select operator" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {Object.entries(FEATURE_FLAG_OPERATORS).map(
+                    ([key, value]) => (
+                      <SelectItem key={value} value={value}>
+                        {key.toLowerCase().replace(/_/g, " ")}
+                      </SelectItem>
+                    )
+                  )}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name={`${name}.${index}.values`}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>
+                {isPercentageRollout ? "Percentage" : "Values"}
+              </FormLabel>
+              <FormControl>
+                {isPercentageRollout ? (
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    placeholder="50"
+                    className="bg-background"
+                    value={field.value?.[0] || ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      field.onChange(value ? [value] : []);
+                    }}
+                  />
+                ) : (
+                  <MultipleSelector
+                    value={
+                      field.value?.map((val: string) => ({
+                        value: val,
+                        label: val,
+                      })) || []
+                    }
+                    onChange={(
+                      selected: { value: string; label: string }[]
+                    ) => {
+                      field.onChange(selected.map((item) => item.value));
+                    }}
+                    creatable
+                    placeholder="Add values"
+                    emptyIndicator={
+                      <p className="text-muted-foreground text-center text-sm leading-4 font-semibold">
+                        No values found.
+                      </p>
+                    }
+                  />
+                )}
+              </FormControl>
+              {isPercentageRollout && (
+                <FormDescription>
+                  Percentage of users who will receive this variation (0-100)
+                </FormDescription>
+              )}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name={`${name}.${index}.variationId`}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Variation</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="bg-background w-full">
+                    <SelectValue placeholder="Select variation" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {variations && variations.length > 0 ? (
+                    variations.map((variation) => (
+                      <SelectItem key={variation.id} value={variation.id || ""}>
+                        {variation.name} ({variation.value})
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>
+                      No variations available
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      {showRemoveButton && (
+        <div className="z-10 left-1/2 -translate-x-1/2 -bottom-5 absolute bg-background border border-dashed p-1 rounded-lg">
+          <Button
+            type="button"
+            onClick={onRemove}
+            size="icon"
+            variant="destructive"
+            className="size-7"
+          >
+            <LucideMinus className="size-4" />
+          </Button>
+        </div>
+      )}
+    </li>
+  );
+}
+
 interface FeatureFlagConditionsProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<any>;
@@ -90,208 +283,22 @@ export function FeatureFlagConditions({
       )}
       <ul className="flex flex-col border rounded-lg bg-sidebar">
         {fields.map((field, index) => (
-          <li
+          <ConditionItem
             key={field.id}
-            className="w-full p-1 not-last:border-b border-dashed not-last:pb-8 relative"
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <div className="flex items-center justify-center size-8 bg-background border text-muted-foreground rounded-lg text-xs font-semibold">
-                {index + 1}
-              </div>
-              <span className="text-sm text-muted-foreground">
-                {index === 0
-                  ? "First condition (highest priority)"
-                  : index === fields.length - 1
-                  ? "Last condition (before default)"
-                  : `Priority ${index + 1}`}
-              </span>
-            </div>
-            <div className="flex flex-row items-start gap-2">
-              <FormField
-                control={control}
-                name={`${name}.${index}.contextAttribute`}
-                render={({ field }) => {
-                  const currentCondition = useWatch({
-                    control,
-                    name: `${name}.${index}`,
-                  });
-                  const isPercentageRollout =
-                    currentCondition?.operator ===
-                    FEATURE_FLAG_OPERATORS.PERCENTAGE_ROLLOUT;
-
-                  return (
-                    <FormItem>
-                      <FormLabel>Context Attribute</FormLabel>
-                      <FormControl>
-                        <Input
-                          className="bg-background"
-                          placeholder={
-                            isPercentageRollout
-                              ? "e.g., userId (for consistent rollout)"
-                              : "e.g., userId, email, plan"
-                          }
-                          {...field}
-                        />
-                      </FormControl>
-                      {isPercentageRollout && (
-                        <FormDescription>
-                          Use a consistent user identifier for stable rollouts
-                          (e.g., userId, email)
-                        </FormDescription>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
-              />
-              <FormField
-                control={control}
-                name={`${name}.${index}.operator`}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Operator</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="bg-background w-full">
-                          <SelectValue placeholder="Select operator" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {Object.entries(FEATURE_FLAG_OPERATORS).map(
-                          ([key, value]) => (
-                            <SelectItem key={value} value={value}>
-                              {key.toLowerCase().replace(/_/g, " ")}
-                            </SelectItem>
-                          )
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={control}
-                name={`${name}.${index}.values`}
-                render={({ field }) => {
-                  const currentCondition = useWatch({
-                    control,
-                    name: `${name}.${index}`,
-                  });
-                  const isPercentageRollout =
-                    currentCondition?.operator ===
-                    FEATURE_FLAG_OPERATORS.PERCENTAGE_ROLLOUT;
-
-                  return (
-                    <FormItem className="flex-1">
-                      <FormLabel>
-                        {isPercentageRollout ? "Percentage" : "Values"}
-                      </FormLabel>
-                      <FormControl>
-                        {isPercentageRollout ? (
-                          <Input
-                            type="number"
-                            min="0"
-                            max="100"
-                            step="0.1"
-                            placeholder="50"
-                            className="bg-background"
-                            value={field.value?.[0] || ""}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              field.onChange(value ? [value] : []);
-                            }}
-                          />
-                        ) : (
-                          <MultipleSelector
-                            value={
-                              field.value?.map((val: string) => ({
-                                value: val,
-                                label: val,
-                              })) || []
-                            }
-                            onChange={(
-                              selected: { value: string; label: string }[]
-                            ) => {
-                              field.onChange(
-                                selected.map((item) => item.value)
-                              );
-                            }}
-                            creatable
-                            placeholder="Add values"
-                            emptyIndicator={
-                              <p className="text-muted-foreground text-center text-sm leading-4 font-semibold">
-                                No values found.
-                              </p>
-                            }
-                          />
-                        )}
-                      </FormControl>
-                      {isPercentageRollout && (
-                        <FormDescription>
-                          Percentage of users who will receive this variation
-                          (0-100)
-                        </FormDescription>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
-              />
-              <FormField
-                control={control}
-                name={`${name}.${index}.variationId`}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Variation</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="bg-background w-full">
-                          <SelectValue placeholder="Select variation" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {variations && variations.length > 0 ? (
-                          variations.map((variation) => (
-                            <SelectItem
-                              key={variation.id}
-                              value={variation.id || ""}
-                            >
-                              {variation.name} ({variation.value})
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="" disabled>
-                            No variations available
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {fields.length > 1 && index != fields.length - 1 && (
-              <div className="z-10 left-1/2 -translate-x-1/2 -bottom-5 absolute bg-background border border-dashed p-1 rounded-lg">
-                <Button
-                  type="button"
-                  onClick={() => remove(index)}
-                  size="icon"
-                  variant="destructive"
-                  className="size-7"
-                >
-                  <LucideMinus className="size-4" />
-                </Button>
-              </div>
-            )}
-          </li>
+            control={control}
+            name={name}
+            index={index}
+            variations={variations || []}
+            onRemove={() => remove(index)}
+            showRemoveButton={fields.length > 1 && index !== fields.length - 1}
+            priorityLabel={
+              index === 0
+                ? "First condition (highest priority)"
+                : index === fields.length - 1
+                ? "Last condition (before default)"
+                : `Priority ${index + 1}`
+            }
+          />
         ))}
       </ul>
       <div className="flex justify-center my-2 relative">

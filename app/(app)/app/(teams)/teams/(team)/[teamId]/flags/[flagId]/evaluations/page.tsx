@@ -257,7 +257,7 @@ export default async function EvaluationsPage({
               <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No Evaluations Yet</h3>
               <p className="text-muted-foreground">
-                This feature flag hasn't been evaluated yet. Once your
+                This feature flag hasn&apos;t been evaluated yet. Once your
                 application starts using this flag, evaluation data will appear
                 here.
               </p>
