@@ -126,7 +126,6 @@ export default async function ApprovalsPage({
             offset={currentOffset}
             limit={pageLimit}
             hasNextPage={hasNextPage}
-            teamId={teamId}
             currentCount={pendingFlags.length}
           />
         </section>

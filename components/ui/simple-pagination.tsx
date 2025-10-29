@@ -10,7 +10,6 @@ interface SimplePaginationProps {
   offset: number;
   limit: number;
   hasNextPage: boolean;
-  teamId: string;
   currentCount?: number;
 }
 
@@ -18,7 +17,6 @@ export function SimplePagination({
   offset,
   limit,
   hasNextPage,
-  teamId,
   currentCount,
 }: SimplePaginationProps) {
   const pathname = usePathname();

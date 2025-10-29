@@ -39,11 +39,11 @@ export default async function ContextPage({
       />
       {success && contexts && contexts.length > 0 ? (
         <div>
-          <section className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
+          <section className="grid grid-cols-1 gap-2">
             {contexts.map((context) => (
               <div
                 key={context.$id}
-                className="border p-1 rounded-lg bg-sidebar break-inside-avoid mb-4"
+                className="border p-1 rounded-lg bg-sidebar"
               >
                 <pre className="bg-background border rounded-lg p-2 mb-2">
                   {JSON.stringify(JSON.parse(context.context), null, 2)}
@@ -54,12 +54,11 @@ export default async function ContextPage({
               </div>
             ))}
           </section>
-          <div className="mt-6">
+          <div className="mt-2">
             <SimplePagination
               offset={currentOffset}
               limit={pageLimit}
               hasNextPage={hasNextPage}
-              teamId={teamId}
               currentCount={contexts.length}
             />
           </div>
