@@ -25,7 +25,7 @@ export default async function ContextPage({
               <pre className="bg-background border rounded-lg p-2 mb-2">
                 {JSON.stringify(JSON.parse(context.context), null, 2)}
               </pre>
-              <time className="text-sm text-muted-foreground pb-1 px-1 block">
+              <time className="text-xs text-muted-foreground pb-1 px-1 block">
                 {new Date(context.$createdAt).toLocaleString()}
               </time>
             </div>

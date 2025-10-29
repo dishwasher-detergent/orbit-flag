@@ -18,7 +18,26 @@ export async function getContextByTeam(
 ): Promise<Result<Context[]>> {
   return withAuth(async () => {
     const { table: database } = await createSessionClient();
-    return getContextByTeamCore(database, teamId);
+
+    try {
+      const contexts = await database.listRows<Context>({
+        databaseId: DATABASE_ID,
+        tableId: CONTEXT_COLLECTION_ID,
+        queries: [Query.equal("teamId", teamId), Query.orderDesc("$createdAt")],
+      });
+
+      return {
+        success: true,
+        message: "Contexts retrieved successfully",
+        data: contexts.rows,
+      };
+    } catch (error) {
+      console.error("Error getting contexts:", error);
+      return {
+        success: false,
+        message: "Failed to get contexts.",
+      };
+    }
   });
 }
 
@@ -43,18 +62,6 @@ export async function createContext(
 //#endregion
 
 //#region Admin Function
-
-/**
- * Get contexts by team (Admin)
- * @param {string} teamId The team ID
- * @returns {Promise<Result<Context[]>>} The contexts
- */
-export async function getContextByTeamAdmin(
-  teamId: string
-): Promise<Result<Context[]>> {
-  const { table: database } = await createAdminClient();
-  return getContextByTeamCore(database, teamId);
-}
 
 /**
  * Create context (Admin)
@@ -82,37 +89,6 @@ export async function createContextAdmin(
 //#endregion
 
 //#region Core Functions
-
-/**
- * Core function to get contexts by team with any database client
- * @param {TablesDB} database The database client (admin or session)
- * @param {string} teamId The team ID
- * @returns {Promise<Result<Context[]>>} The contexts
- */
-async function getContextByTeamCore(
-  database: TablesDB,
-  teamId: string
-): Promise<Result<Context[]>> {
-  try {
-    const contexts = await database.listRows<Context>({
-      databaseId: DATABASE_ID,
-      tableId: CONTEXT_COLLECTION_ID,
-      queries: [Query.equal("teamId", teamId)],
-    });
-
-    return {
-      success: true,
-      message: "Contexts retrieved successfully",
-      data: contexts.rows,
-    };
-  } catch (error) {
-    console.error("Error getting contexts:", error);
-    return {
-      success: false,
-      message: "Failed to get contexts.",
-    };
-  }
-}
 
 /**
  * Core function to create context with any database client
