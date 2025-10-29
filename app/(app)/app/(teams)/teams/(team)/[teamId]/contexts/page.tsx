@@ -1,15 +1,34 @@
-import { LucideFingerprint } from "lucide-react";
+import { ChevronLeft, LucideFingerprint } from "lucide-react";
+import Link from "next/link";
+import { Query } from "node-appwrite";
 
+import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
+import { SimplePagination } from "@/components/ui/simple-pagination";
 import { getContextByTeam } from "@/lib/context";
 
 export default async function ContextPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ teamId: string }>;
+  searchParams: Promise<{ offset?: string; limit?: string }>;
 }) {
   const { teamId } = await params;
-  const { data: contexts, success } = await getContextByTeam(teamId);
+  const { offset = "0", limit = "10" } = await searchParams;
+
+  const currentOffset = Math.max(0, parseInt(offset) || 0);
+  const pageLimit = Math.min(50, Math.max(6, parseInt(limit) || 12));
+
+  const queries = [Query.limit(pageLimit + 1), Query.offset(currentOffset)];
+
+  const { data: allContexts, success } = await getContextByTeam(
+    teamId,
+    queries
+  );
+
+  const hasNextPage = allContexts ? allContexts.length > pageLimit : false;
+  const contexts = allContexts ? allContexts.slice(0, pageLimit) : [];
 
   return (
     <>
@@ -19,30 +38,52 @@ export default async function ContextPage({
         description="View and manage your contexts used for feature flag targeting."
       />
       {success && contexts && contexts.length > 0 ? (
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {contexts.map((context) => (
-            <div key={context.$id} className="border p-1 rounded-lg bg-sidebar">
-              <pre className="bg-background border rounded-lg p-2 mb-2">
-                {JSON.stringify(JSON.parse(context.context), null, 2)}
-              </pre>
-              <time className="text-xs text-muted-foreground pb-1 px-1 block">
-                {new Date(context.$createdAt).toLocaleString()}
-              </time>
-            </div>
-          ))}
-        </section>
+        <div>
+          <section className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
+            {contexts.map((context) => (
+              <div
+                key={context.$id}
+                className="border p-1 rounded-lg bg-sidebar break-inside-avoid mb-4"
+              >
+                <pre className="bg-background border rounded-lg p-2 mb-2">
+                  {JSON.stringify(JSON.parse(context.context), null, 2)}
+                </pre>
+                <time className="text-xs text-muted-foreground pb-1 px-1 block">
+                  {new Date(context.$createdAt).toLocaleString()}
+                </time>
+              </div>
+            ))}
+          </section>
+          <div className="mt-6">
+            <SimplePagination
+              offset={currentOffset}
+              limit={pageLimit}
+              hasNextPage={hasNextPage}
+              teamId={teamId}
+              currentCount={contexts.length}
+            />
+          </div>
+        </div>
       ) : (
         <section className="border bg-sidebar rounded-lg p-1">
           <div className="p-4 border border-input bg-background rounded-lg flex flex-col items-center">
             <LucideFingerprint className="size-12 text-muted-foreground/50 mb-2" />
             <h3 className="text-lg font-semibold mb-2 text-center">
-              No contexts yet
+              {currentOffset > 0 ? "No more contexts" : "No contexts yet"}
             </h3>
-            <p className="text-muted-foreground max-w-md mx-auto text-center">
-              Contexts are created automatically when you use them in your
-              application. Start by integrating the SDK and defining your
-              contexts.
+            <p className="text-muted-foreground max-w-md mx-auto text-center mb-4">
+              {currentOffset > 0
+                ? "You've reached the end of the list. Try going back to see previous contexts."
+                : "Contexts are created automatically when you use them in your application. Start by integrating the SDK and defining your contexts."}
             </p>
+            {currentOffset > 0 && (
+              <Button asChild variant="outline">
+                <Link href={`/app/teams/${teamId}/contexts`}>
+                  <ChevronLeft className="size-4 mr-1" />
+                  Back to First Page
+                </Link>
+              </Button>
+            )}
           </div>
         </section>
       )}

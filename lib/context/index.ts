@@ -11,10 +11,12 @@ import { createAdminClient, createSessionClient } from "@/lib/server/appwrite";
 /**
  * Get all contexts for a team
  * @param {string} teamId The team ID
+ * @param {string[]} queries Additional query parameters
  * @returns {Promise<Result<Context[]>>} The contexts
  */
 export async function getContextByTeam(
-  teamId: string
+  teamId: string,
+  queries: string[] = []
 ): Promise<Result<Context[]>> {
   return withAuth(async () => {
     const { table: database } = await createSessionClient();
@@ -23,7 +25,11 @@ export async function getContextByTeam(
       const contexts = await database.listRows<Context>({
         databaseId: DATABASE_ID,
         tableId: CONTEXT_COLLECTION_ID,
-        queries: [Query.equal("teamId", teamId), Query.orderDesc("$createdAt")],
+        queries: [
+          Query.equal("teamId", teamId),
+          Query.orderDesc("$createdAt"),
+          ...queries,
+        ],
       });
 
       return {
