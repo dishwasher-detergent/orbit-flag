@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ID, Permission, Role } from "node-appwrite";
+import { ID, Permission, Query, Role } from "node-appwrite";
 import { z } from "zod";
 
 import {
@@ -163,7 +163,8 @@ async function evaluateFlag(
   }
 
   const { data: featureFlags, success } = await getFeatureFlagsByTeamAdmin(
-    teamId
+    teamId,
+    [Query.equal("key", flagKey)]
   );
 
   if (!success || !featureFlags) {
@@ -180,7 +181,7 @@ async function evaluateFlag(
     );
   }
 
-  const flag = featureFlags.find((f) => f.key === flagKey);
+  const flag = featureFlags[0];
 
   if (!flag) {
     return NextResponse.json(

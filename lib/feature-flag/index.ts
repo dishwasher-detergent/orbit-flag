@@ -604,10 +604,11 @@ export async function toggleFeatureFlagApproval(
  * @returns {Promise<Result<FeatureFlag[]>>} The feature flags
  */
 export async function getFeatureFlagsByTeamAdmin(
-  teamId: string
+  teamId: string,
+  queries: string[] = []
 ): Promise<Result<FeatureFlag[]>> {
   const { table: database } = await createAdminClient();
-  return getFeatureFlagsByTeamCore(database, teamId);
+  return getFeatureFlagsByTeamCore(database, teamId, queries);
 }
 
 //#endregion
