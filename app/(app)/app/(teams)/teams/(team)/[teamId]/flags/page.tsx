@@ -153,7 +153,6 @@ export default async function FlagsPage({
             offset={currentOffset}
             limit={pageLimit}
             hasNextPage={hasNextPage}
-            teamId={teamId}
             currentCount={featureFlags.length}
           />
         </section>
