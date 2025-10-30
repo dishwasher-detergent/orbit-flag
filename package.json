@@ -36,12 +36,14 @@
     "js-cookie": "^3.0.5",
     "lefthook": "^1.12.3",
     "lucide-react": "^0.477.0",
+    "motion": "^12.23.24",
     "next": "15.2.1",
     "next-themes": "^0.4.6",
     "node-appwrite": "^20.2.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.62.0",
+    "react-use-measure": "^2.1.7",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
@@ -57,6 +59,7 @@
     "eslint": "^9.34.0",
     "eslint-config-next": "15.2.1",
     "puppeteer": "^24.17.1",
+    "shadcn": "^3.5.0",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.9.2"
   }
