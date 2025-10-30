@@ -64,7 +64,7 @@ export default async function ContextPage({
           </div>
         </div>
       ) : (
-        <section className="p-4 border border-input bg-sidebar rounded-lg flex flex-col items-center">
+        <section className="p-4 border bg-sidebar rounded-lg flex flex-col items-center">
           <LucideFingerprint className="size-12 text-muted-foreground/50 mb-2" />
           <h3 className="text-lg font-semibold mb-2 text-center">
             {currentOffset > 0 ? "No more contexts" : "No contexts yet"}

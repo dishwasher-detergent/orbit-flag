@@ -40,7 +40,7 @@ export function TeamMembers({
   return (
     <section>
       <h3 className="font-semibold text-base mb-2">Members</h3>
-      <div className="border border-input rounded-lg bg-background">
+      <div className="border rounded-lg bg-background">
         <Table>
           <TableHeader>
             <TableRow>

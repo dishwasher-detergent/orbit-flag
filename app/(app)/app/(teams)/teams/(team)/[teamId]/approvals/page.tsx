@@ -68,7 +68,7 @@ export default async function ApprovalsPage({
       />
       {success && pendingFlags && pendingFlags.length > 0 ? (
         <section className="border rounded-lg overflow-hidden p-1 bg-sidebar">
-          <div className="border border-input rounded-lg bg-background">
+          <div className="border rounded-lg bg-background">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -130,7 +130,7 @@ export default async function ApprovalsPage({
           />
         </section>
       ) : (
-        <section className="p-4 border border-input bg-sidebar rounded-lg flex flex-col items-center">
+        <section className="p-4 border bg-sidebar rounded-lg flex flex-col items-center">
           <LucideThumbsUp className="size-12 text-muted-foreground/50 mx-auto mb-2" />
           <h3 className="text-lg font-semibold text-center mb-2">
             {currentOffset > 0

@@ -204,7 +204,7 @@ export default async function EvaluationsPage({
         <CardContent>
           {evaluations && evaluations.length > 0 ? (
             <div className="border rounded-lg overflow-hidden p-1 bg-sidebar">
-              <div className="border border-input rounded-lg bg-background">
+              <div className="border rounded-lg bg-background">
                 <Table>
                   <TableHeader>
                     <TableRow>

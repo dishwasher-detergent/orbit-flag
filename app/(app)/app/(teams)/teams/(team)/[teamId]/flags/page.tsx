@@ -68,7 +68,7 @@ export default async function FlagsPage({
       </PageHeader>
       {success && featureFlags && featureFlags.length > 0 ? (
         <section>
-          <div className="border border-input rounded-lg bg-background mb-2">
+          <div className="border rounded-lg bg-background mb-2">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -155,7 +155,7 @@ export default async function FlagsPage({
           />
         </section>
       ) : (
-        <section className="p-4 border border-input bg-sidebar rounded-lg flex flex-col items-center">
+        <section className="p-4 border bg-sidebar rounded-lg flex flex-col items-center">
           <ToggleLeft className="size-12 text-muted-foreground/50 mx-auto mb-2" />
           <h3 className="text-lg font-semibold text-center mb-2">
             {currentOffset > 0
