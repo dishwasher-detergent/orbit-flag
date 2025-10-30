@@ -22,7 +22,7 @@ export function NavDocs({ teamId }: NavDocsProps) {
           <SidebarMenuButton asChild tooltip="Documentation">
             <Link href={`/app/teams/${teamId}/documentation`}>
               <LucideCode2 />
-              <span>Usage</span>
+              <span>How To Use</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
