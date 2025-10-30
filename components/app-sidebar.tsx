@@ -17,6 +17,7 @@ import {
 import { NavUser } from "@/components/user/nav-user";
 import { useTeamData } from "@/hooks/useTeamData";
 import { useUserData } from "@/hooks/useUserData";
+import { NavDocs } from "./nav-docs";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { teamId } = useParams<{
@@ -39,6 +40,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain userRoles={roles} />
         {teamId && <NavTeam teamId={teamId} />}
+        {teamId && <NavDocs teamId={teamId} />}
         <div className="mt-auto p-2">
           <ThemeToggle />
         </div>

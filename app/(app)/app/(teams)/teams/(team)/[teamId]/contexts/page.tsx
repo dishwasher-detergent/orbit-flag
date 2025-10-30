@@ -64,26 +64,24 @@ export default async function ContextPage({
           </div>
         </div>
       ) : (
-        <section className="border bg-sidebar rounded-lg p-1">
-          <div className="p-4 border border-input bg-background rounded-lg flex flex-col items-center">
-            <LucideFingerprint className="size-12 text-muted-foreground/50 mb-2" />
-            <h3 className="text-lg font-semibold mb-2 text-center">
-              {currentOffset > 0 ? "No more contexts" : "No contexts yet"}
-            </h3>
-            <p className="text-muted-foreground max-w-md mx-auto text-center mb-4">
-              {currentOffset > 0
-                ? "You've reached the end of the list. Try going back to see previous contexts."
-                : "Contexts are created automatically when you use them in your application. Start by integrating the SDK and defining your contexts."}
-            </p>
-            {currentOffset > 0 && (
-              <Button asChild variant="outline">
-                <Link href={`/app/teams/${teamId}/contexts`}>
-                  <ChevronLeft className="size-4 mr-1" />
-                  Back to First Page
-                </Link>
-              </Button>
-            )}
-          </div>
+        <section className="p-4 border border-input bg-sidebar rounded-lg flex flex-col items-center">
+          <LucideFingerprint className="size-12 text-muted-foreground/50 mb-2" />
+          <h3 className="text-lg font-semibold mb-2 text-center">
+            {currentOffset > 0 ? "No more contexts" : "No contexts yet"}
+          </h3>
+          <p className="text-muted-foreground max-w-md mx-auto text-center mb-4 text-sm">
+            {currentOffset > 0
+              ? "You've reached the end of the list. Try going back to see previous contexts."
+              : "Contexts are created automatically when you use them in your application. Start by integrating the SDK and defining your contexts."}
+          </p>
+          {currentOffset > 0 && (
+            <Button asChild variant="outline">
+              <Link href={`/app/teams/${teamId}/contexts`}>
+                <ChevronLeft className="size-4 mr-1" />
+                Back to First Page
+              </Link>
+            </Button>
+          )}
         </section>
       )}
     </>

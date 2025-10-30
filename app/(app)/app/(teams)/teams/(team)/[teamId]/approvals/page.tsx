@@ -130,32 +130,30 @@ export default async function ApprovalsPage({
           />
         </section>
       ) : (
-        <section className="border bg-sidebar rounded-lg p-1">
-          <div className="p-4 border border-input bg-background rounded-lg flex flex-col items-center">
-            <LucideThumbsUp className="size-12 text-muted-foreground/50 mx-auto mb-2" />
-            <h3 className="text-lg font-semibold text-center mb-2">
-              {currentOffset > 0
-                ? "No more pending approvals"
-                : "No pending approvals"}
-            </h3>
-            <p className="text-muted-foreground max-w-md mx-auto text-center mb-4">
-              {currentOffset > 0
-                ? "You've reached the end of the list. Try going back to see previous approvals."
-                : "All feature flag changes have been processed. New requests requiring approval will appear here."}
-            </p>
-            {currentOffset > 0 ? (
-              <Button asChild variant="outline">
-                <Link href={`/app/teams/${teamId}/approvals`}>
-                  <ChevronLeft className="size-4 mr-1" />
-                  Back to First Page
-                </Link>
-              </Button>
-            ) : (
-              <Button asChild variant="outline">
-                <Link href={`/app/teams/${teamId}/flags`}>View All Flags</Link>
-              </Button>
-            )}
-          </div>
+        <section className="p-4 border border-input bg-sidebar rounded-lg flex flex-col items-center">
+          <LucideThumbsUp className="size-12 text-muted-foreground/50 mx-auto mb-2" />
+          <h3 className="text-lg font-semibold text-center mb-2">
+            {currentOffset > 0
+              ? "No more pending approvals"
+              : "No pending approvals"}
+          </h3>
+          <p className="text-muted-foreground max-w-md mx-auto text-center mb-4 text-sm">
+            {currentOffset > 0
+              ? "You've reached the end of the list. Try going back to see previous approvals."
+              : "All feature flag changes have been processed. New requests requiring approval will appear here."}
+          </p>
+          {currentOffset > 0 ? (
+            <Button asChild variant="outline">
+              <Link href={`/app/teams/${teamId}/approvals`}>
+                <ChevronLeft className="size-4 mr-1" />
+                Back to First Page
+              </Link>
+            </Button>
+          ) : (
+            <Button asChild variant="outline">
+              <Link href={`/app/teams/${teamId}/flags`}>View All Flags</Link>
+            </Button>
+          )}
         </section>
       )}
     </>
