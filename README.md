@@ -1,49 +1,6 @@
-# 🚀 Appwrite NextJS Starter
+# Orbit Flag
 
-A starter template for building web applications with Next.js and Appwrite.
-
-## 📚 Overview
-
-This starter template provides everything you need to build a
-modern web application with Next.js and Appwrite. It includes a
-full authentication system, user profile management, and a clean,
-responsive UI.
-
-Perfect for quickly bootstrapping your next project without
-spending time on repetitive setup tasks.
-
-## ✨ Features
-
-- 🔐 **Authentication Flows**
-  - 📧 Email & Password Sign In/Sign Up
-  - 🔄 Password Recovery Process
-  - 🔑 OAuth Integration (GitHub, Google, etc.)
-- 📊 **Data Management**
-  - ✏️ Complete CRUD Operations Examples
-  - 📁 File Storage Implementations
-  - ⚡ Realtime Updates
-  - 🔄 Cache Invalidation
-- 👥 **Team Management**
-  - 🏢 Create and Manage Teams
-  - 👥 Invite Team Members
-  - 👑 Role-based Permissions (Owner, Admin, Member)
-  - 🚪 Join/Leave Teams
-  - 🔒 Team-specific Content Access
-- 👤 **User Management**
-  - 👨‍💻 Profile Editing & Customization
-  - 🔗 Team Affiliations
-- 📋 **General**
-  - 🛡️ Protected Routes
-  - 🎨 TailwindCSS
-  - 📱 Responsive Design
-
-## 📋 Prerequisites
-
-- 📦 [Node.js 22.x or later](https://nodejs.org/en/download)
-- 🔧 [pnpm](https://pnpm.io/)
-- ☁️ [Appwrite](https://cloud.appwrite.io)
-
-## ⚙️ Installation
+## Installation
 
 1. Clone this repository:
 
@@ -75,11 +32,11 @@ pnpm run dev
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-## 🚢 Deploying Project using the Appwrite CLI
+## Deploying Project using the Appwrite CLI
 
 [Appwrite CLI](https://appwrite.io/docs/tooling/command-line/installation) allows you to automate and streamline your Appwrite workflows.
 
-### 📥 Installation
+### Installation
 
 Install the Appwrite CLI globally:
 
@@ -87,7 +44,7 @@ Install the Appwrite CLI globally:
 npm install -g appwrite-cli
 ```
 
-### 🔧 Setup
+### Setup
 
 1. Login to your Appwrite account:
 
@@ -95,7 +52,7 @@ npm install -g appwrite-cli
 appwrite login
 ```
 
-### 🚀 Push to Appwrite
+### Push to Appwrite
 
 1. Deploy the project:
 
@@ -115,7 +72,7 @@ appwrite push collections
 appwrite push buckets
 ```
 
-## 🔑 Adding GitHub OAuth to Appwrite
+## Adding GitHub OAuth to Appwrite
 
 1. 🔗 Go to your [GitHub Developer Settings](https://github.com/settings/apps) and create a new App.
 
@@ -133,10 +90,10 @@ https://cloud.appwrite.io/v1/account/sessions/oauth2/callback/github/appwrite-ne
 
 6. 💾 Save your changes.
 
-## 👥 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.

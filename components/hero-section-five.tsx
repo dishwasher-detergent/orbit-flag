@@ -27,9 +27,9 @@ export default function HeroSection() {
         </div>
         <div className="relative mt-12 overflow-hidden rounded-3xl bg-muted md:mt-16 w-full aspect-video border">
           <img
-            src="/feature-conditions.png"
+            src="/flags-list.png"
             alt=""
-            className="absolute inset-0 size-full object-cover"
+            className="absolute inset-0 size-full object-cover object-top-left"
           />
         </div>
 

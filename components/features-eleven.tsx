@@ -19,7 +19,7 @@ export default function FeaturesSection() {
               <img
                 src="/feature-conditions.png"
                 alt=""
-                className="absolute inset-0 size-full object-cover"
+                className="absolute inset-0 size-full object-cover object-top-left"
               />
             </Card>
             <div className="@sm:grid-cols-2 @2xl:grid-cols-3 grid gap-6">
