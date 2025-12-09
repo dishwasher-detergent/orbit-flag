@@ -729,6 +729,8 @@ async function getTeamByIdCore(
       };
     });
 
+    data.whitelist = data.whitelist?.map((url) => new URL(url)) || [];
+
     return {
       success: true,
       message: "Team successfully retrieved.",

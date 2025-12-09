@@ -127,11 +127,13 @@ async function checkWhitelist(
       if (requestOrigin) {
         try {
           const requestUrl = new URL(requestOrigin);
-          const requestDomain = `${requestUrl.protocol}//${requestUrl.host}`;
+          const requestDomain = requestUrl.host;
 
           const isWhitelisted = team.whitelist.some((whitelistUrl) => {
-            const whitelistDomain = `${whitelistUrl.protocol}//${whitelistUrl.host}`;
-            return whitelistDomain === requestDomain;
+            const whitelistDomain = whitelistUrl.host;
+            return (
+              whitelistDomain.toLowerCase() === requestDomain.toLowerCase()
+            );
           });
 
           if (isWhitelisted) {
