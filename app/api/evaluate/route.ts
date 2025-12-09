@@ -33,6 +33,22 @@ interface EvaluateResponse {
 }
 
 /**
+ * CORS headers to allow any domain
+ */
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+/**
+ * Handle preflight OPTIONS request
+ */
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
+/**
  * Save evaluation result to database
  */
 async function saveEvaluation(
@@ -258,7 +274,14 @@ export async function POST(
     const validatedData = evaluateRequestSchema.parse(body);
 
     const { teamId, flagKey, context } = validatedData;
-    return await evaluateFlag(request, teamId, flagKey, context);
+    const response = await evaluateFlag(request, teamId, flagKey, context);
+
+    // Add CORS headers to the response
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+
+    return response;
   } catch (error) {
     console.error("Error evaluating feature flag:", error);
 
@@ -274,7 +297,7 @@ export async function POST(
             .map((e) => `${e.path.join(".")}: ${e.message}`)
             .join(", "),
         },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -287,7 +310,7 @@ export async function POST(
         reason: "Internal server error",
         error: "An unexpected error occurred while evaluating the feature flag",
       },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
